@@ -1,5 +1,15 @@
 # Changelog
 
+## Performance Enhancements [2023-04-28]
+
+### UI/UX Speed Improvements
+- Removed all artificial API delays for instant interface responses
+- Fixed Dashboard navigation issues when clicking from Vault page
+- Eliminated timeouts and delays for all user interactions
+- Improved component loading and transitions for seamless experience
+- Optimized query client configuration for faster data loading
+- Ensured mock data loads instantly for better demo experience
+
 ## Major UI and UX Improvements [2023-04-26]
 
 ### User Experience Enhancements

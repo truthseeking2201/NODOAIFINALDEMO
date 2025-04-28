@@ -19,8 +19,40 @@ export function PositionsPanel({ positions, isLoading, onWithdraw }: PositionsPa
     return <PositionsSkeletonLoader />;
   }
 
-  if (!positions.length) {
-    return <EmptyPositionsState />;
+  // For demo purposes, show mock data even if positions array is empty
+  const hasPositions = positions && positions.length > 0;
+
+  if (!hasPositions) {
+    // Create mock positions data for demonstration
+    const mockPositions: UserInvestment[] = [
+      {
+        vaultId: "deep-sui",
+        principal: 500,
+        shares: 48.25,
+        depositDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+        lockupPeriod: 60,
+        unlockDate: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000).toISOString(),
+        currentValue: 536.50,
+        profit: 36.50,
+        isWithdrawable: false,
+        currentApr: 24.8
+      },
+      {
+        vaultId: "cetus-sui",
+        principal: 750,
+        shares: 73.12,
+        depositDate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+        lockupPeriod: 30,
+        unlockDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+        currentValue: 771.25,
+        profit: 21.25,
+        isWithdrawable: true,
+        currentApr: 18.7
+      }
+    ];
+
+    // Use mockPositions instead of returning empty state
+    positions = mockPositions;
   }
 
   const handleAddFunds = (vaultId: string) => {

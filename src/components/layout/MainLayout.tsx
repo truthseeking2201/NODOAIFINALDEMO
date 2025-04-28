@@ -24,16 +24,9 @@ export function MainLayout({ children }: MainLayoutProps) {
 
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
+      // Always show cursor in demo without auto-hiding
       setShowCursor(true);
-
-      // Hide the custom cursor after 2 seconds of inactivity
-      clearTimeout(mouseMoveTimeout);
-      mouseMoveTimeout = setTimeout(() => {
-        setShowCursor(false);
-      }, 2000);
     };
-
-    let mouseMoveTimeout: NodeJS.Timeout;
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("mousemove", handleMouseMove);
@@ -42,7 +35,6 @@ export function MainLayout({ children }: MainLayoutProps) {
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("mousemove", handleMouseMove);
-      clearTimeout(mouseMoveTimeout);
     };
   }, []);
 

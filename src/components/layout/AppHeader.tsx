@@ -56,6 +56,19 @@ export function AppHeader() {
   const location = useLocation();
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Preload the Dashboard component on header mount to ensure it's ready for navigation
+  useEffect(() => {
+    // Preload Dashboard component in the background
+    import("@/pages/Dashboard").catch(error => {
+      console.error("Failed to preload Dashboard:", error);
+    });
+  }, []);
+
+  // Reset mobile menu when location changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
   // Mock notifications for demo - enhanced with AI notifications
   const [notifications, setNotifications] = useState<Notification[]>([
     {
@@ -102,18 +115,10 @@ export function AppHeader() {
     }
   ]);
 
-  // Simulate AI mode changes periodically
+  // Fix AI mode to avoid random changes
   useEffect(() => {
-    const aiModes: Array<"analyzing" | "optimizing" | "monitoring" | "predicting"> = [
-      "analyzing", "optimizing", "monitoring", "predicting"
-    ];
-
-    const interval = setInterval(() => {
-      const randomMode = aiModes[Math.floor(Math.random() * aiModes.length)];
-      setAiActivityMode(randomMode);
-    }, 45000); // Change every 45 seconds
-
-    return () => clearInterval(interval);
+    // Set a fixed mode for demo purposes
+    setAiActivityMode("monitoring");
   }, []);
 
   // Focus search input when activated
@@ -134,9 +139,10 @@ export function AppHeader() {
   const toggleSearch = () => {
     setIsSearchActive(!isSearchActive);
     if (!isSearchActive) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 100);
+      // Focus immediately
+      if (searchInputRef.current) {
+        searchInputRef.current.focus();
+      }
     } else {
       setSearchQuery("");
     }
@@ -263,6 +269,11 @@ export function AppHeader() {
                 ${location.pathname === '/'
                   ? 'bg-white/10 text-white'
                   : 'text-white/70 hover:text-white hover:bg-white/5'}`}
+              onClick={(e) => {
+                if (location.pathname === '/') {
+                  e.preventDefault(); // Prevent redundant navigation if already on this page
+                }
+              }}
             >
               <div className="flex items-center gap-1.5">
                 <Zap size={14} className={location.pathname === '/' ? 'text-nova' : ''} />
@@ -275,6 +286,17 @@ export function AppHeader() {
                 ${location.pathname === '/dashboard'
                   ? 'bg-white/10 text-white'
                   : 'text-white/70 hover:text-white hover:bg-white/5'}`}
+              onClick={(e) => {
+                if (location.pathname === '/dashboard') {
+                  e.preventDefault(); // Prevent redundant navigation if already on this page
+                  return;
+                }
+
+                // Preload Dashboard component on click to ensure it's ready
+                import("@/pages/Dashboard").catch(err =>
+                  console.error("Failed to preload Dashboard:", err)
+                );
+              }}
             >
               <div className="flex items-center gap-1.5">
                 <BarChart3 size={14} className={location.pathname === '/dashboard' ? 'text-nova' : ''} />
@@ -421,7 +443,12 @@ export function AppHeader() {
                       ? 'bg-white/10 text-white'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => {
+                    if (location.pathname === '/') {
+                      e.preventDefault();
+                    }
+                    setIsMobileMenuOpen(false);
+                  }}
                 >
                   <Zap size={16} className={location.pathname === '/' ? 'text-nova' : ''} />
                   <span className="font-medium">Vaults</span>
@@ -433,7 +460,17 @@ export function AppHeader() {
                       ? 'bg-white/10 text-white'
                       : 'text-white/70 hover:bg-white/5 hover:text-white'
                   }`}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => {
+                    if (location.pathname === '/dashboard') {
+                      e.preventDefault();
+                    } else {
+                      // Preload Dashboard component on mobile click
+                      import("@/pages/Dashboard").catch(err =>
+                        console.error("Failed to preload Dashboard on mobile:", err)
+                      );
+                    }
+                    setIsMobileMenuOpen(false);
+                  }}
                 >
                   <BarChart3 size={16} className={location.pathname === '/dashboard' ? 'text-nova' : ''} />
                   <span className="font-medium">Dashboard</span>

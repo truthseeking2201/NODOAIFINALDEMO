@@ -63,27 +63,46 @@ export default function Dashboard() {
   const [isTxDrawerOpen, setIsTxDrawerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("classic");
   const [showWelcomeModal, setShowWelcomeModal] = useState(true);
+  const [isPageMounted, setIsPageMounted] = useState(false);
+
+  // Mark component as mounted to ensure all hooks and data are properly initialized
+  useEffect(() => {
+    setIsPageMounted(true);
+
+    // Signal that dashboard is ready to the parent component
+    return () => {
+      // Cleanup
+    };
+  }, []);
+
+  // Always ensure the cache is cleared on dashboard load to get fresh mock data
+  useEffect(() => {
+    vaultService.clearCache();
+  }, []);
 
   const { data: investments, isLoading: loadingInvestments } = useQuery({
     queryKey: ['userInvestments'],
     queryFn: vaultService.getUserInvestments,
-    enabled: isConnected,
+    enabled: isConnected && isPageMounted,
+    staleTime: 60000, // Cache data for 1 minute
+    retry: 3, // Retry failed requests more times
+    refetchOnWindowFocus: false,
   });
 
   const { data: activities, isLoading: loadingActivities } = useQuery({
     queryKey: ['transactionHistory'],
     queryFn: vaultService.getTransactionHistory,
-    enabled: isConnected,
+    enabled: isConnected && isPageMounted,
+    staleTime: 60000, // Cache data for 1 minute
+    retry: 3, // Retry failed requests more times
+    refetchOnWindowFocus: false,
   });
 
   // Hide welcome modal after a delay
   useEffect(() => {
     if (showWelcomeModal) {
-      const timer = setTimeout(() => {
-        setShowWelcomeModal(false);
-      }, 3000);
-
-      return () => clearTimeout(timer);
+      // Set welcome modal to false immediately in demo mode
+      setShowWelcomeModal(false);
     }
   }, [showWelcomeModal]);
 
@@ -146,9 +165,40 @@ export default function Dashboard() {
     return <ConnectWalletPrompt />;
   }
 
-  // Calculate total metrics
-  const totalValue = investments?.reduce((sum, inv) => sum + inv.currentValue, 0) || 0;
-  const totalProfit = investments?.reduce((sum, inv) => sum + inv.profit, 0) || 0;
+  // Use mock data if investments are not loaded
+  const mockInvestments: UserInvestment[] = [
+    {
+      vaultId: "deep-sui",
+      principal: 500,
+      shares: 48.25,
+      depositDate: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
+      lockupPeriod: 60,
+      unlockDate: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000).toISOString(),
+      currentValue: 536.50,
+      profit: 36.50,
+      isWithdrawable: false,
+      currentApr: 24.8
+    },
+    {
+      vaultId: "cetus-sui",
+      principal: 750,
+      shares: 73.12,
+      depositDate: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
+      lockupPeriod: 30,
+      unlockDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+      currentValue: 771.25,
+      profit: 21.25,
+      isWithdrawable: true,
+      currentApr: 18.7
+    }
+  ];
+
+  // Always ensure we have investment data for the metrics
+  const investmentsData = investments && investments.length > 0 ? investments : mockInvestments;
+
+  // Calculate total metrics using the data we have
+  const totalValue = investmentsData.reduce((sum, inv) => sum + inv.currentValue, 0);
+  const totalProfit = investmentsData.reduce((sum, inv) => sum + inv.profit, 0);
 
   return (
     <PageContainer className="dashboard-container mx-auto pb-20 relative">
@@ -227,16 +277,15 @@ export default function Dashboard() {
             className="dashboard-grid space-y-8"
           >
             <MetricsOverview
-              investments={investments || []}
+              investments={investmentsData}
               isLoading={loadingInvestments}
             />
 
-            {balance?.receiptTokens > 0 && (
-              <ReceiptTokenCard
-                tokens={balance.receiptTokens}
-                onRedeem={handleRedeemClick}
-              />
-            )}
+            {/* Always show receipt tokens in demo mode */}
+            <ReceiptTokenCard
+              tokens={balance?.receiptTokens || 125.2}
+              onRedeem={handleRedeemClick}
+            />
 
             <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 shadow-sm">
               <div className="flex items-center justify-between mb-4">
@@ -260,14 +309,14 @@ export default function Dashboard() {
             </div>
 
             <PositionsPanel
-              positions={investments || []}
-              isLoading={loadingInvestments}
+              positions={investmentsData}
+              isLoading={loadingInvestments && investmentsData.length === 0}
               onWithdraw={handleWithdrawClick}
             />
 
             <ActivityPanel
               activities={activities || []}
-              isLoading={loadingActivities}
+              isLoading={loadingActivities && (!activities || activities.length === 0)}
             />
           </motion.div>
         )}

@@ -182,9 +182,6 @@ export class VaultService {
     }
 
     try {
-      // Simulate API delay - remove in production
-      await new Promise(resolve => setTimeout(resolve, 100));
-
       // Store in cache for future use
       cache.vaults = this.vaults;
       return Promise.resolve(this.vaults);
@@ -206,21 +203,24 @@ export class VaultService {
     return Promise.resolve(vault);
   }
 
-  // Get user investments with caching
+  // Get user investments with caching - always return mock data for demo purposes
   async getUserInvestments(): Promise<UserInvestment[]> {
+    // Reset userInvestments to default mock data to ensure it's always populated
+    this.userInvestments = createMockUserInvestments();
+
     if (cache.investments) {
       return Promise.resolve(cache.investments);
     }
-
-    // Simulate API delay - remove in production
-    await new Promise(resolve => setTimeout(resolve, 100));
 
     cache.investments = this.userInvestments;
     return Promise.resolve(this.userInvestments);
   }
 
-  // Get transaction history with caching
+  // Get transaction history with caching - always return mock data for demo purposes
   async getTransactionHistory(vaultId?: string): Promise<TransactionHistory[]> {
+    // Reset transaction history to default mock data to ensure it's always populated
+    this.sharedTransactionHistory = createMockTransactions();
+
     // Check cache first
     if (cache.transactions) {
       if (!vaultId) {
@@ -228,9 +228,6 @@ export class VaultService {
       }
       return Promise.resolve(cache.transactions.filter(tx => tx.vaultId === vaultId));
     }
-
-    // Simulate API delay - remove in production
-    await new Promise(resolve => setTimeout(resolve, 100));
 
     cache.transactions = this.sharedTransactionHistory;
 

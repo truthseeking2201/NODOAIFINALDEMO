@@ -69,33 +69,16 @@ export default function VaultCatalog() {
   const y1 = useTransform(scrollYProgress, [0, 1], [0, -100]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0.6]);
 
-  // Progressive loading of sections
+  // Progressive loading of sections - load everything immediately in demo
   useEffect(() => {
-    // Show ticker animation faster for better UX
-    const tickerTimer = setTimeout(() => {
-      setShowAnimation(true);
-      setVisibleSections(prev => ({ ...prev, neuralActivity: true }));
-    }, 300);
-
-    // Gradually load other sections
-    const gridTimer = setTimeout(() => {
-      setVisibleSections(prev => ({ ...prev, vaultGrid: true }));
-    }, 600);
-
-    const nodoaixTimer = setTimeout(() => {
-      setVisibleSections(prev => ({ ...prev, nodoaix: true }));
-    }, 900);
-
-    const activityTimer = setTimeout(() => {
-      setVisibleSections(prev => ({ ...prev, activity: true }));
-    }, 1200);
-
-    return () => {
-      clearTimeout(tickerTimer);
-      clearTimeout(gridTimer);
-      clearTimeout(nodoaixTimer);
-      clearTimeout(activityTimer);
-    };
+    // Show all sections immediately without delays
+    setShowAnimation(true);
+    setVisibleSections({
+      neuralActivity: true,
+      vaultGrid: true,
+      nodoaix: true,
+      activity: true
+    });
   }, []);
 
   const handleVaultHover = (id: string) => {

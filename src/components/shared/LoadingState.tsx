@@ -63,14 +63,9 @@ export function LoadingState({
     );
   }
 
-  // Inline loading spinner
+  // Inline loading spinner - empty for demo
   if (type === 'inline') {
-    return (
-      <div className={cn("flex items-center gap-2", className)}>
-        <div className="h-4 w-4 rounded-full border-2 border-nova/30 border-t-nova animate-spin" />
-        <span className="text-sm text-white/70">Loading...</span>
-      </div>
-    );
+    return null;
   }
 
   // Row-based skeleton

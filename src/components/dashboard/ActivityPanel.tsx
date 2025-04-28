@@ -93,8 +93,43 @@ export function ActivityPanel({ activities, isLoading }: ActivityPanelProps) {
     setIsReasoningDrawerOpen(true);
   };
 
-  if (!activities.length && !mockAIActivities.length) {
-    return <EmptyActivityState />;
+  // For demo purposes, always ensure we have data to display
+  const hasActivities = activities && activities.length > 0;
+
+  if (!hasActivities) {
+    // Create mock transaction data if none exists
+    const mockTransactions: TransactionHistory[] = [
+      {
+        id: "user-1",
+        type: "deposit",
+        amount: 5000,
+        vaultId: "deep-sui",
+        vaultName: "DEEP-SUI",
+        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        status: "completed"
+      },
+      {
+        id: "user-2",
+        type: "deposit",
+        amount: 2500,
+        vaultId: "cetus-sui",
+        vaultName: "CETUS-SUI",
+        timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+        status: "completed"
+      },
+      {
+        id: "user-3",
+        type: "withdraw",
+        amount: 1200,
+        vaultId: "sui-usdc",
+        vaultName: "SUI-USDC",
+        timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+        status: "completed"
+      }
+    ];
+
+    // Use mock data instead of returning empty state
+    activities = mockTransactions;
   }
 
   return (

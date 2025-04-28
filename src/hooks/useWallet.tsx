@@ -38,8 +38,7 @@ const useWalletStore = create<WalletState>((set) => ({
   }, // Initialize with demo values
   connect: async (walletType) => {
     set({ isConnecting: true })
-    // Simulate connecting
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Connect immediately without delay in demo
     set({
       address: '0x7d783c975da6e3b5ff8259436d4f7da675da6',
       isConnected: true,
@@ -102,12 +101,14 @@ export const useWallet = () => {
     vaultName?: string;
   } | null>(null);
 
-  // Automatically reconnect if previously connected - using localStorage only, no wallet APIs
+  // Always connect in demo mode for demonstration purposes
   useEffect(() => {
-    const hasConnectedBefore = localStorage.getItem('wallet-connected') === 'true'
-
-    if (hasConnectedBefore && !isConnected && !isConnecting) {
+    // In demo mode, always ensure wallet is connected
+    if (!isConnected && !isConnecting) {
       connect('demo')
+
+      // Store connection state
+      localStorage.setItem('wallet-connected', 'true')
     }
   }, [connect, isConnected, isConnecting])
 
@@ -139,12 +140,10 @@ export const useWallet = () => {
     setIsSignatureDialogOpen(true);
 
     return new Promise<void>((resolve) => {
-      // Simulate transaction signing
-      setTimeout(() => {
-        setIsSignatureDialogOpen(false);
-        setCurrentTransaction(null);
-        resolve();
-      }, 1500);
+      // Complete transaction immediately
+      setIsSignatureDialogOpen(false);
+      setCurrentTransaction(null);
+      resolve();
     });
   }, []);
 

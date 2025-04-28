@@ -7,28 +7,49 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { lazy, Suspense } from 'react';
 import { LoadingState } from "@/components/shared/LoadingState";
 
-// Lazy load pages for better performance
-const VaultCatalog = lazy(() => import("./pages/VaultCatalog"));
-const VaultDetail = lazy(() => import("./pages/VaultDetail"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+// Lazy load pages for better performance with improved loading reliability
+const VaultCatalog = lazy(() => import("./pages/VaultCatalog").catch(e => {
+  console.error("Error loading VaultCatalog:", e);
+  return { default: () => <PageFallback /> };
+}));
+const VaultDetail = lazy(() => import("./pages/VaultDetail").catch(e => {
+  console.error("Error loading VaultDetail:", e);
+  return { default: () => <PageFallback /> };
+}));
+const Dashboard = lazy(() =>
+  // Load Dashboard component immediately without delay
+  import("./pages/Dashboard")
+    .catch(e => {
+      console.error("Error loading Dashboard:", e);
+      return { default: () => <PageFallback /> };
+    })
+);
+const NotFound = lazy(() => import("./pages/NotFound").catch(e => {
+  console.error("Error loading NotFound:", e);
+  return { default: () => <PageFallback /> };
+}));
 
-// Create query client with basic configuration
+// Create query client with zero-delay configuration for demo purposes
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      retry: false, // Disable retries to simplify debugging
+      retry: false, // Disable retries
+      staleTime: 0, // No cache delays
+      retryDelay: 0, // No retry delays
     },
   },
 });
 
-// Fallback for lazy loaded components
-const PageFallback = () => (
-  <div className="w-full min-h-[50vh] flex items-center justify-center">
-    <LoadingState type="spinner" className="scale-150" />
-  </div>
-);
+// Replace loading state with mock data for demo - no loading screen needed
+const PageFallback = () => null;
+
+// Preload Dashboard component immediately when app loads
+(() => {
+  // This immediate invocation will preload the Dashboard in the background
+  import("./pages/Dashboard")
+    .catch(err => console.error("Failed to preload Dashboard on init:", err));
+})();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -36,31 +57,44 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Suspense fallback={<PageFallback />}>
-          <Routes>
-            <Route path="/" element={
-              <MainLayout>
+        <Routes>
+          <Route path="/" element={
+            <MainLayout>
+              <Suspense fallback={<PageFallback />}>
                 <VaultCatalog />
-              </MainLayout>
-            } />
-            {/* Routes for backward compatibility with old URLs */}
-            <Route path="/vaults/orion-stable" element={<Navigate to="/vaults/cetus-sui" replace />} />
-            <Route path="/vaults/nova-yield" element={<Navigate to="/vaults/deep-sui" replace />} />
-            <Route path="/vaults/emerald-growth" element={<Navigate to="/vaults/sui-usdc" replace />} />
-            {/* Regular vault detail route */}
-            <Route path="/vaults/:vaultId" element={
-              <MainLayout>
+              </Suspense>
+            </MainLayout>
+          } />
+
+          {/* Routes for backward compatibility with old URLs */}
+          <Route path="/vaults/orion-stable" element={<Navigate to="/vaults/cetus-sui" replace />} />
+          <Route path="/vaults/nova-yield" element={<Navigate to="/vaults/deep-sui" replace />} />
+          <Route path="/vaults/emerald-growth" element={<Navigate to="/vaults/sui-usdc" replace />} />
+
+          {/* Regular vault detail route */}
+          <Route path="/vaults/:vaultId" element={
+            <MainLayout>
+              <Suspense fallback={<PageFallback />}>
                 <VaultDetail />
-              </MainLayout>
-            } />
-            <Route path="/dashboard" element={
-              <MainLayout>
+              </Suspense>
+            </MainLayout>
+          } />
+
+          {/* Dashboard route with dedicated Suspense */}
+          <Route path="/dashboard" element={
+            <MainLayout>
+              <Suspense fallback={<PageFallback />}>
                 <Dashboard />
-              </MainLayout>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
+              </Suspense>
+            </MainLayout>
+          } />
+
+          <Route path="*" element={
+            <Suspense fallback={<PageFallback />}>
+              <NotFound />
+            </Suspense>
+          } />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

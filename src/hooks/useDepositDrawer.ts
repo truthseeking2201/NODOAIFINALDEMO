@@ -44,8 +44,8 @@ export const useDepositDrawer = (props?: UseDepositDrawerProps) => {
   useEffect(() => {
     if (amount || selectedLockup) {
       setFadeRefresh(true);
-      const timer = setTimeout(() => setFadeRefresh(false), 120);
-      return () => clearTimeout(timer);
+      // No delay in demo mode, set false immediately
+      setFadeRefresh(false);
     }
   }, [amount, selectedLockup, setFadeRefresh]);
 
@@ -58,7 +58,8 @@ export const useDepositDrawer = (props?: UseDepositDrawerProps) => {
     onSuccess: (data) => {
       setStep('success');
       setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
+      // No delay in demo mode, hide confetti immediately
+      setShowConfetti(false);
 
       // Show the NODOAIx Token minted toast notification
       toast({
@@ -161,7 +162,8 @@ export const useDepositDrawer = (props?: UseDepositDrawerProps) => {
         // Immediately show success screen with optimistic UI approach
         setStep('success');
         setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 3000);
+        // No delay in demo mode
+        setShowConfetti(false);
 
         // Show NODOAIx Token minted toast
         toast({
