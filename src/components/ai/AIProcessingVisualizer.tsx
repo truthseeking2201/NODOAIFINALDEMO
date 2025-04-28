@@ -94,7 +94,7 @@ export function AIProcessingVisualizer({
     setCells(initialCells);
   }, [gridSize]);
 
-  // Handle state transitions and effects
+  // Handle state transitions and effects with optimized performance
   useEffect(() => {
     if (cells.length === 0) return;
 
@@ -114,67 +114,84 @@ export function AIProcessingVisualizer({
       return;
     }
 
-    // Simulate processing flow
-    const interval = setInterval(() => {
+    // Track timeouts for cleanup
+    const timeouts: NodeJS.Timeout[] = [];
+
+    // Simulate processing flow - use a reasonable interval
+    const updateInterval = setInterval(() => {
+      if (state === "complete") {
+        setCells(prev => prev.map(cell => ({ ...cell, state: "complete" })));
+        return;
+      }
+
       setCells(prev => {
-        if (state === "complete") {
-          return prev.map(cell => ({ ...cell, state: "complete" }));
+        if (state !== "analyzing" && state !== "optimizing") {
+          return prev;
         }
 
         // Flow pattern based on direction
         const newCells = [...prev];
-        const activeCount = newCells.filter(c => c.state === "active").length;
+        const activeCount = newCells.filter(c => c.state === "active" || c.state === "processing").length;
 
-        if (state === "analyzing" || state === "optimizing") {
-          // Simulate the next wave of cell activations
-          const inactiveCells = newCells.filter(c => c.state === "inactive");
+        // Optimize by limiting the number of cells to process at once
+        const inactiveCells = newCells.filter(c => c.state === "inactive");
 
-          if (inactiveCells.length > 0) {
-            // Activate new cells based on progress
-            const totalCells = gridSize * gridSize;
-            const targetActiveCells = Math.floor((progress / 100) * totalCells);
-            const cellsToActivate = Math.min(
-              Math.max(1, Math.floor(totalCells / 20)), // At least 1, at most 5% of cells
-              targetActiveCells - activeCount
-            );
+        if (inactiveCells.length > 0) {
+          // Activate new cells based on progress
+          const totalCells = gridSize * gridSize;
+          const targetActiveCells = Math.floor((progress / 100) * totalCells);
 
-            if (cellsToActivate > 0) {
-              // Choose random inactive cells to activate
-              const shuffled = [...inactiveCells].sort(() => 0.5 - Math.random());
-              const toActivate = shuffled.slice(0, cellsToActivate);
+          // Limit cells to activate to prevent too many state updates
+          const cellsToActivate = Math.min(
+            2, // Limit to max 2 cells at a time for better performance
+            Math.max(1, Math.floor(totalCells / 25)),
+            targetActiveCells - activeCount
+          );
 
-              toActivate.forEach(cell => {
-                const index = newCells.findIndex(c => c.x === cell.x && c.y === cell.y);
-                if (index !== -1) {
-                  newCells[index].state = "processing";
+          if (cellsToActivate > 0) {
+            // Choose random inactive cells to activate
+            const shuffled = [...inactiveCells].sort(() => 0.5 - Math.random());
+            const toActivate = shuffled.slice(0, cellsToActivate);
 
-                  // After 100-300ms, change to active
-                  setTimeout(() => {
-                    setCells(current => {
-                      const updatedCells = [...current];
-                      const cellIndex = updatedCells.findIndex(c => c.x === cell.x && c.y === cell.y);
-                      if (cellIndex !== -1) {
-                        updatedCells[cellIndex].state = "active";
-                      }
-                      return updatedCells;
-                    });
+            toActivate.forEach(cell => {
+              const index = newCells.findIndex(c => c.x === cell.x && c.y === cell.y);
+              if (index !== -1) {
+                newCells[index].state = "processing";
 
-                    setActiveCells(count => count + 1);
-                    setDataPoints(count => count + Math.floor(Math.random() * 20) + 10);
-                    setConfidence(Math.min(99, Math.floor(progress * 0.95)));
-                  }, 100 + Math.random() * 200);
-                }
-              });
-            }
+                // After 100-300ms, change to active - track timeout for cleanup
+                const timeout = setTimeout(() => {
+                  // Batch updates to reduce renders
+                  setCells(current => {
+                    const updatedCells = [...current];
+                    const cellIndex = updatedCells.findIndex(c => c.x === cell.x && c.y === cell.y);
+                    if (cellIndex !== -1) {
+                      updatedCells[cellIndex].state = "active";
+                    }
+                    return updatedCells;
+                  });
+
+                  // Batch these state updates together to reduce renders
+                  setActiveCells(count => count + 1);
+                  setDataPoints(count => count + Math.floor(Math.random() * 20) + 10);
+                  setConfidence(Math.min(99, Math.floor(progress * 0.95)));
+                }, 150 + Math.random() * 100); // Slightly tighter range of timeouts
+
+                timeouts.push(timeout);
+              }
+            });
           }
         }
 
         return newCells;
       });
-    }, 1000 / speed);
+    }, Math.max(500, 1000 / speed)); // Ensure minimum 500ms interval for better performance
 
-    return () => clearInterval(interval);
-  }, [cells, state, progress, speed, gridSize, showError, controls]);
+    // Cleanup function to clear all intervals and timeouts
+    return () => {
+      clearInterval(updateInterval);
+      timeouts.forEach(clearTimeout);
+    };
+  }, [state, progress, speed, gridSize, showError, controls]);
 
   // Processing cell component
   const Cell = ({ cell }: { cell: ProcessingCell }) => {
@@ -283,39 +300,66 @@ export function AIProcessingVisualizer({
     );
   };
 
-  // Terminal output effect
+  // Terminal output effect with optimized rendering
   const TerminalOutput = () => {
     const [outputLines, setOutputLines] = useState<string[]>([]);
 
+    // Memoize possible lines to prevent recreation on each render
+    const possibleLines = useMemo(() => [
+      "Loading neural network weights...",
+      "Initializing tensor operations...",
+      "Analyzing market patterns...",
+      "Processing transaction history...",
+      "Optimizing risk profile...",
+      "Running predictive models...",
+      "Calculating optimal positions...",
+      "Applying neural boosting...",
+      "Validating strategies...",
+      "Executing tensor operations...",
+      "Cross-referencing market data...",
+      "Calculating confidence intervals...",
+    ], []);
+
     useEffect(() => {
-      if (state === "idle" || state === "complete" || showError) return;
+      // Skip terminal animation in certain states
+      if (state === "idle" || state === "complete" || showError) {
+        // Clear output lines when not active
+        if (outputLines.length > 0) {
+          setOutputLines([]);
+        }
+        return;
+      }
 
-      const possibleLines = [
-        "Loading neural network weights...",
-        "Initializing tensor operations...",
-        "Analyzing market patterns...",
-        "Processing transaction history...",
-        "Optimizing risk profile...",
-        "Running predictive models...",
-        "Calculating optimal positions...",
-        "Applying neural boosting...",
-        "Validating strategies...",
-        "Executing tensor operations...",
-        "Cross-referencing market data...",
-        "Calculating confidence intervals...",
-      ];
-
+      // Use a longer interval to reduce renders
       const interval = setInterval(() => {
-        const randomLine = possibleLines[Math.floor(Math.random() * possibleLines.length)];
+        // Get a random line but make sure it's not the same as the most recent line
+        const getRandomLine = () => {
+          const randomIndex = Math.floor(Math.random() * possibleLines.length);
+          const randomLine = possibleLines[randomIndex];
+
+          // If this matches the most recent line and we have options, get another
+          if (outputLines.length > 0 && randomLine === outputLines[outputLines.length - 1] && possibleLines.length > 1) {
+            return getRandomLine();
+          }
+
+          return randomLine;
+        };
+
+        const randomLine = getRandomLine();
+
         setOutputLines(prev => {
-          const newLines = [...prev, randomLine];
-          return newLines.slice(-3); // Keep only the last 3 lines
+          if (prev.length >= 3) {
+            // Remove oldest line and add new one (more efficient than slice)
+            return [prev[1], prev[2], randomLine];
+          }
+          return [...prev, randomLine];
         });
-      }, 2000);
+      }, 3000); // Longer interval (3s instead of 2s) to reduce updates
 
       return () => clearInterval(interval);
-    }, [state, showError]);
+    }, [state, showError, possibleLines, outputLines]);
 
+    // Don't render anything if there's nothing to show
     if (state === "idle" || outputLines.length === 0) return null;
 
     return (

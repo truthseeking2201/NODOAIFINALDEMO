@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Brain,
@@ -26,6 +26,33 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { useProcessorProgress } from "@/hooks/useProcessorProgress";
+
+// Simple error boundary component for handling rendering errors
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("Error in component:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 
 // Mock data for the dashboard
 const mockPerformanceData = Array.from({ length: 30 }).map((_, i) => {
@@ -146,62 +173,64 @@ const aiActions = [
 export function AIInsightsDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTimeRange, setActiveTimeRange] = useState("1M");
-  const [processorState, setProcessorState] = useState<"idle" | "analyzing" | "optimizing" | "complete" | "error">("analyzing");
-  const [processingProgress, setProcessingProgress] = useState(0);
   const [showAllInsights, setShowAllInsights] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const { toast } = useToast();
 
-  // Simulate loading state
+  // Use our custom processor progress hook for better stability
+  const {
+    state: processorState,
+    progress: processingProgress,
+    restart: restartProcessor,
+    isComplete,
+    isProcessing
+  } = useProcessorProgress({
+    initialState: 'analyzing',
+    initialProgress: 0,
+    speed: 1,
+    onComplete: () => {
+      toast({
+        title: "AI Analysis Complete",
+        description: "New insights and optimization strategies are available",
+        duration: 3000,
+      });
+    }
+  });
+
+  // Simulate loading state with reduced timeout
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 1500);
+    }, 1000); // Reduced time for better UX
 
     return () => clearTimeout(timer);
   }, []);
 
-  // Simulate AI processor progress
-  useEffect(() => {
-    if (processorState === "idle" || processorState === "complete" || processorState === "error") {
-      return;
-    }
+  // Memoize mock data to prevent unnecessary recalculations
+  const memoizedPerformanceData = useMemo(() => mockPerformanceData, []);
+  const memoizedInsights = useMemo(() => mockInsights, []);
+  const memoizedAiActions = useMemo(() => aiActions, []);
 
-    const interval = setInterval(() => {
-      setProcessingProgress(prev => {
-        const newProgress = prev + (Math.random() * 3);
+  // Display insights based on showAll state using memoized data
+  const displayedInsights = showAllInsights ? memoizedInsights : memoizedInsights.slice(0, 2);
 
-        if (newProgress >= 100) {
-          clearInterval(interval);
-          setProcessorState("complete");
-          return 100;
-        }
-
-        if (newProgress > 50 && processorState === "analyzing") {
-          setProcessorState("optimizing");
-        }
-
-        return newProgress;
-      });
-    }, 300);
-
-    return () => clearInterval(interval);
-  }, [processorState]);
-
-  // Restart the processor
-  const restartProcessor = () => {
-    setProcessorState("analyzing");
-    setProcessingProgress(0);
-
-    toast({
-      title: "AI Analysis Initiated",
-      description: "Starting comprehensive analysis of your portfolio",
-      duration: 3000,
-    });
-  };
-
-  // Display insights based on showAll state
-  const displayedInsights = showAllInsights ? mockInsights : mockInsights.slice(0, 2);
+  // Show loading state when data is being prepared
+  if (isLoading) {
+    return (
+      <div className="min-h-[300px] flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="relative w-12 h-12">
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-t-nova border-r-transparent border-b-transparent border-l-transparent"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+            />
+          </div>
+          <div className="text-white/60 text-sm font-medium">Loading AI Dashboard...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -282,20 +311,32 @@ export function AIInsightsDashboard() {
               aiEnhanced={true}
               aiTag="AI Forecasting"
             >
-              <AIEnhancedChart
-                data={mockPerformanceData}
-                chartType="area"
-                theme="nova"
-                showPredictions={true}
-                showInsights={true}
-                animated={true}
-                title="Portfolio Value"
-                timeRange={activeTimeRange}
-                onTimeRangeChange={setActiveTimeRange}
-                valueUnit="$"
-                showComparison={true}
-                comparisonPercentage={11.4}
-              />
+              <ErrorBoundary
+                fallback={
+                  <div className="p-4 bg-black/30 rounded-lg border border-white/10 text-center">
+                    <AlertTriangle className="mx-auto mb-2 text-orange-500" size={24} />
+                    <h4 className="text-white font-medium">Chart Visualization Error</h4>
+                    <p className="text-sm text-white/70 mt-1">
+                      We encountered an issue rendering this chart. Please refresh the dashboard.
+                    </p>
+                  </div>
+                }
+              >
+                <AIEnhancedChart
+                  data={memoizedPerformanceData}
+                  chartType="area"
+                  theme="nova"
+                  showPredictions={true}
+                  showInsights={true}
+                  animated={true}
+                  title="Portfolio Value"
+                  timeRange={activeTimeRange}
+                  onTimeRangeChange={setActiveTimeRange}
+                  valueUnit="$"
+                  showComparison={true}
+                  comparisonPercentage={11.4}
+                />
+              </ErrorBoundary>
             </AICard>
 
             {/* AI Processing Visualizer */}
@@ -316,6 +357,7 @@ export function AIInsightsDashboard() {
                   progress={processingProgress}
                   showMetrics={true}
                   className="mb-4"
+                  speed={1.5} // Reduce animation speed for better performance
                 />
 
                 {processorState === "complete" && (
@@ -489,7 +531,7 @@ export function AIInsightsDashboard() {
               }
             >
               <div className="space-y-3">
-                {aiActions.map((action) => (
+                {memoizedAiActions.map((action) => (
                   <div
                     key={action.id}
                     className="flex items-start gap-3 p-3 rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 transition-colors"
@@ -597,21 +639,44 @@ export function AIInsightsDashboard() {
             aiEnhanced={true}
           >
             <div className="h-80">
-              <AIEnhancedChart
-                data={mockPerformanceData}
-                chartType="area"
-                theme="nova"
-                showPredictions={true}
-                showInsights={true}
-                animated={true}
-                title="Portfolio Value Over Time"
-                timeRange={activeTimeRange}
-                onTimeRangeChange={setActiveTimeRange}
-                valueUnit="$"
-                showComparison={true}
-                comparisonPercentage={11.4}
-                className="h-full"
-              />
+              <ErrorBoundary
+                fallback={
+                  <div className="h-80 flex items-center justify-center bg-black/30 rounded-lg border border-white/10">
+                    <div className="text-center p-4">
+                      <AlertTriangle className="mx-auto mb-2 text-orange-500" size={24} />
+                      <h4 className="text-white font-medium">Chart Visualization Error</h4>
+                      <p className="text-sm text-white/70 mt-1">
+                        We encountered an issue rendering this chart.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-3 border-white/10 bg-white/5 hover:bg-white/10"
+                        onClick={() => window.location.reload()}
+                      >
+                        <RefreshCw className="mr-2" size={14} />
+                        Refresh Dashboard
+                      </Button>
+                    </div>
+                  </div>
+                }
+              >
+                <AIEnhancedChart
+                  data={memoizedPerformanceData}
+                  chartType="area"
+                  theme="nova"
+                  showPredictions={true}
+                  showInsights={true}
+                  animated={true}
+                  title="Portfolio Value Over Time"
+                  timeRange={activeTimeRange}
+                  onTimeRangeChange={setActiveTimeRange}
+                  valueUnit="$"
+                  showComparison={true}
+                  comparisonPercentage={11.4}
+                  className="h-full"
+                />
+              </ErrorBoundary>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">

@@ -142,30 +142,43 @@ export function AIEnhancedChart({
       }
     };
 
+    // Initial update
     updateWidth();
+
+    // Add resize listener
     window.addEventListener("resize", updateWidth);
 
+    // Cleanup
     return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
-  // Animate chart on mount
+  // Animate chart on mount with optimized animation
   useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+
     if (animated) {
+      // Reset progress
       setProgress(0);
-      const timer = setInterval(() => {
+
+      // Use a faster interval for smoother animation but less CPU usage
+      timer = setInterval(() => {
         setProgress(prev => {
           if (prev >= 100) {
-            clearInterval(timer);
+            if (timer) clearInterval(timer);
             return 100;
           }
-          return prev + 2;
+          // Increase by larger steps to reduce the number of renders
+          return Math.min(100, prev + 4);
         });
-      }, 10);
-
-      return () => clearInterval(timer);
+      }, 20);
     } else {
       setProgress(100);
     }
+
+    // Cleanup
+    return () => {
+      if (timer) clearInterval(timer);
+    };
   }, [animated]);
 
   // Get color based on theme
@@ -308,20 +321,27 @@ export function AIEnhancedChart({
             opacity={0.5}
           />
         )}
-        {isHovered && insight.type === "positive" && <Plus size={8} x={-4} y={-4} color="white" />}
-        {isHovered && insight.type === "negative" && <Minus size={8} x={-4} y={-4} color="white" />}
-        {isHovered && insight.type === "warning" && <AlertTriangle size={8} x={-4} y={-4} color="white" />}
-        {isHovered && insight.type === "neutral" && <Info size={8} x={-4} y={-4} color="white" />}
+        {isHovered && (
+          <g transform="translate(-4, -4)">
+            {insight.type === "positive" && (
+              <path d="M4 1v6M1 4h6" stroke="white" strokeWidth="1.5" />
+            )}
+            {insight.type === "negative" && (
+              <path d="M1 4h6" stroke="white" strokeWidth="1.5" />
+            )}
+            {insight.type === "warning" && (
+              <path d="M4 1L7 6H1L4 1Z M4 4.5V5 M4 6V6.01" stroke="white" strokeWidth="1.5" fill="none" />
+            )}
+            {insight.type === "neutral" && (
+              <path d="M4 1.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM4 6v.01M4 3v2" stroke="white" strokeWidth="1.5" />
+            )}
+          </g>
+        )}
       </motion.g>
     );
   };
 
-  // Icon for Minus since it doesn't exist in Lucide
-  const Minus = ({ size = 24, color = "currentColor", x = 0, y = 0 }: { size?: number, color?: string, x?: number, y?: number }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" x={x} y={y}>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
-  );
+  // Removed unnecessary Minus component as we now use SVG paths directly
 
   // Insight type icon
   const getInsightIcon = (type: Insight["type"]) => {

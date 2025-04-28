@@ -5,7 +5,8 @@ import { MetricsOverview } from "@/components/dashboard/MetricsOverview";
 import { ReceiptTokenCard } from "@/components/dashboard/ReceiptTokenCard";
 import { PositionsPanel } from "@/components/dashboard/PositionsPanel";
 import { ActivityPanel } from "@/components/dashboard/ActivityPanel";
-import { AIInsightsDashboard } from "@/components/dashboard/AIInsightsDashboard";
+// Import the simplified dashboard instead of the complex one
+import { SimplifiedAIInsightsDashboard } from "@/components/dashboard/SimplifiedAIInsightsDashboard";
 import { useWallet } from "@/hooks/useWallet";
 import { useQuery } from "@tanstack/react-query";
 import { vaultService } from "@/services/vaultService";
@@ -22,9 +23,36 @@ import {
   Settings,
   ArrowUpRight,
   ChevronRight,
-  Zap
+  Zap,
+  AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// A simpler ErrorBoundary that shouldn't conflict with the one in AIInsightsDashboard
+class DashboardErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: any, errorInfo: any) {
+    console.error("Dashboard error caught:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
 
 export default function Dashboard() {
   const { isConnected, balance } = useWallet();
@@ -252,7 +280,29 @@ export default function Dashboard() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <AIInsightsDashboard />
+            <DashboardErrorBoundary
+              fallback={
+                <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-6 space-y-4">
+                  <div className="flex flex-col items-center justify-center text-center space-y-3">
+                    <AlertTriangle size={32} className="text-orion" />
+                    <h3 className="text-xl font-medium text-white">AI Dashboard Error</h3>
+                    <p className="text-white/70">
+                      We encountered an issue loading the AI Dashboard. We're working on a fix.
+                    </p>
+                    <Button
+                      variant="outline"
+                      className="mt-4 border-white/10 bg-white/5 hover:bg-white/10"
+                      onClick={() => setActiveTab("classic")}
+                    >
+                      <BarChart size={16} className="mr-2" />
+                      Switch to Classic View
+                    </Button>
+                  </div>
+                </div>
+              }
+            >
+              <SimplifiedAIInsightsDashboard />
+            </DashboardErrorBoundary>
 
             {/* Quick access to classic view */}
             <div className="mt-8 flex justify-center">
