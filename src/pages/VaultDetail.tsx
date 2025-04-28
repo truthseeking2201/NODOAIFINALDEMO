@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { VaultDetailSkeleton } from "@/components/vault/VaultDetailSkeleton";
 import { VaultDetailError } from "@/components/vault/VaultDetailError";
 import { VaultDetailHeader } from "@/components/vault/VaultDetailHeader";
 import { VaultDetailLayout } from "@/components/vault/VaultDetailLayout";
@@ -108,6 +107,16 @@ export default function VaultDetail() {
     getVaultStyles
   } = useVaultDetail(vaultId || '');
 
+  // Force clearing cache and data refresh on mount
+  useEffect(() => {
+    if (vaultId) {
+      // Clear the cache to ensure fresh data
+      import("@/services/vaultService").then(module => {
+        module.vaultService.clearCache();
+      }).catch(err => console.error("Failed to clear vault cache:", err));
+    }
+  }, [vaultId]);
+
   // Handle AI insights from the visualizer
   const handleOptimizationEvent = (event: string) => {
     setAiInsight(event);
@@ -182,8 +191,9 @@ export default function VaultDetail() {
     setWasManuallyClosedRef(true);
   };
 
+  // Skip loading state but keep error handling
   if (isLoading) {
-    return <VaultDetailSkeleton />;
+    return null; // Return nothing during loading instead of a loading skeleton
   }
 
   if (error || !vault) {

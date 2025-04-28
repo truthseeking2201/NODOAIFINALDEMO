@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { lazy, Suspense } from 'react';
-import { LoadingState } from "@/components/shared/LoadingState";
 
 // Lazy load pages for better performance with improved loading reliability
 const VaultCatalog = lazy(() => import("./pages/VaultCatalog").catch(e => {
@@ -29,14 +28,16 @@ const NotFound = lazy(() => import("./pages/NotFound").catch(e => {
   return { default: () => <PageFallback /> };
 }));
 
-// Create query client with zero-delay configuration for demo purposes
+// Create query client that still loads data but doesn't show loading states
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: false, // Disable retries
-      staleTime: 0, // No cache delays
-      retryDelay: 0, // No retry delays
+      staleTime: 60000, // Cache for 1 minute
+      cacheTime: 120000, // Keep in cache for 2 minutes
+      suspense: false, // Don't use suspense for data fetching
+      useErrorBoundary: false, // Don't use error boundaries
     },
   },
 });

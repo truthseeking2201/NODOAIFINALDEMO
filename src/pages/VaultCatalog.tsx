@@ -8,7 +8,6 @@ import { useState, useEffect, useRef, useMemo, lazy, Suspense } from "react";
 import { Card } from "@/components/ui/card";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import { ErrorState } from "@/components/shared/ErrorState";
-import { LoadingState } from "@/components/shared/LoadingState";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { Vault } from "@/types";
 import { VaultData } from "@/types/vault";
@@ -20,23 +19,16 @@ const VaultCarousel = lazy(() => import('@/components/vault/VaultCarousel').then
 const NODOAIxPromoBanner = lazy(() => import('@/components/vault/NODOAIxPromoBanner').then(mod => ({ default: mod.NODOAIxPromoBanner })));
 const ActivitySection = lazy(() => import('@/components/vault/ActivitySection').then(mod => ({ default: mod.ActivitySection })));
 
-// Simple loader component
-const SectionLoader = () => (
-  <div className="w-full py-8 flex justify-center">
-    <LoadingState type="spinner" className="scale-150" />
-  </div>
-);
-
 // Vault filter types
 type VaultFilter = 'All' | 'Top APR' | 'Lowest Risk' | 'New';
 
 export default function VaultCatalog() {
+  // Get vault data but hide loading state in UI
   const { data: rawVaults, isLoading, error, refetch } = useQuery<Vault[]>({
     queryKey: ['vaults'],
     queryFn: () => vaultService.getVaults(),
-    retry: 3,
-    retryDelay: 1000,
-    staleTime: 60000, // 1 minute
+    suspense: false,
+    refetchOnMount: true, // Always refetch when component mounts
     refetchOnWindowFocus: false,
   });
 
@@ -59,6 +51,11 @@ export default function VaultCatalog() {
     nodoaix: false,
     activity: false
   });
+
+  // Explicitly clear cache when component mounts to ensure fresh data
+  useEffect(() => {
+    vaultService.clearCache();
+  }, []);
 
   // Optimize scroll effects by simplifying the transformations
   const { scrollYProgress } = useScroll({
@@ -134,7 +131,7 @@ export default function VaultCatalog() {
 
           <AnimatePresence>
             {showAnimation && (
-              <Suspense fallback={<div className="h-12 mt-6 bg-black/20 rounded-full animate-pulse" />}>
+              <Suspense fallback={null}>
                 {visibleSections.neuralActivity && (
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -152,13 +149,13 @@ export default function VaultCatalog() {
 
         {/* Mobile carousel for small screens */}
         <AnimatePresence>
-          {isMobile && vaults.length > 0 && !isLoading && !error && (
+          {isMobile && vaults.length > 0 && (
             <motion.section
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="md:hidden px-4"
             >
-              <Suspense fallback={<SectionLoader />}>
+              <Suspense fallback={null}>
                 <VaultCarousel
                   vaults={filteredVaults}
                   isConnected={isConnected}
@@ -198,25 +195,7 @@ export default function VaultCatalog() {
               </div>
             </div>
 
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {Array.from({ length: isMobile ? 1 : 6 }).map((_, index) => (
-                  <LoadingState
-                    key={index}
-                    type="card"
-                    height={320}
-                    className="w-full"
-                  />
-                ))}
-              </div>
-            ) : error ? (
-              <ErrorState
-                type="error"
-                title="Unable to Load Vaults"
-                message="We encountered an issue while loading the vaults. Please try again later."
-                onRetry={() => refetch()}
-              />
-            ) : filteredVaults.length > 0 ? (
+            {filteredVaults.length > 0 ? (
               <motion.div
                 className="component-spacing"
                 initial="hidden"
@@ -254,7 +233,7 @@ export default function VaultCatalog() {
               </h2>
               <p className="text-white/70 mt-2">Intelligent yield optimization receipts with exclusive benefits</p>
             </div>
-            <Suspense fallback={<SectionLoader />}>
+            <Suspense fallback={null}>
               <NODOAIxPromoBanner />
             </Suspense>
           </div>
@@ -267,7 +246,7 @@ export default function VaultCatalog() {
           transition={{ duration: 0.5 }}
           className="component-spacing"
         >
-          <Suspense fallback={<SectionLoader />}>
+          <Suspense fallback={null}>
             <ActivitySection />
           </Suspense>
         </motion.section>

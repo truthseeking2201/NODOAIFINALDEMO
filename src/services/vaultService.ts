@@ -181,14 +181,9 @@ export class VaultService {
       return Promise.resolve(cache.vaults);
     }
 
-    try {
-      // Store in cache for future use
-      cache.vaults = this.vaults;
-      return Promise.resolve(this.vaults);
-    } catch (error) {
-      console.error("Error fetching vaults:", error);
-      return Promise.resolve(this.vaults);
-    }
+    // Otherwise, return data immediately without delay
+    cache.vaults = this.vaults;
+    return Promise.resolve(this.vaults);
   }
 
   // Get a specific vault by ID with caching
@@ -198,14 +193,14 @@ export class VaultService {
       return Promise.resolve(cache.vaults.find(v => v.id === id));
     }
 
-    // Otherwise get from the vaults list
+    // Otherwise get from the vaults list without delay
     const vault = this.vaults.find(v => v.id === id);
     return Promise.resolve(vault);
   }
 
-  // Get user investments with caching - always return mock data for demo purposes
+  // Get user investments with caching
   async getUserInvestments(): Promise<UserInvestment[]> {
-    // Reset userInvestments to default mock data to ensure it's always populated
+    // Reset userInvestments to default mock data
     this.userInvestments = createMockUserInvestments();
 
     if (cache.investments) {
@@ -216,9 +211,9 @@ export class VaultService {
     return Promise.resolve(this.userInvestments);
   }
 
-  // Get transaction history with caching - always return mock data for demo purposes
+  // Get transaction history with caching
   async getTransactionHistory(vaultId?: string): Promise<TransactionHistory[]> {
-    // Reset transaction history to default mock data to ensure it's always populated
+    // Reset transaction history to default mock data
     this.sharedTransactionHistory = createMockTransactions();
 
     // Check cache first
