@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { MetricsOverview } from "@/components/dashboard/MetricsOverview";
 import { ReceiptTokenCard } from "@/components/dashboard/ReceiptTokenCard";
-import { PerformanceChart } from "@/components/dashboard/PerformanceChart";
 import { PositionsPanel } from "@/components/dashboard/PositionsPanel";
 import { ActivityPanel } from "@/components/dashboard/ActivityPanel";
+import { AIInsightsDashboard } from "@/components/dashboard/AIInsightsDashboard";
 import { useWallet } from "@/hooks/useWallet";
 import { useQuery } from "@tanstack/react-query";
 import { vaultService } from "@/services/vaultService";
@@ -14,6 +14,17 @@ import { UserInvestment, TransactionHistory } from "@/types/vault";
 import { WithdrawModal } from "@/components/vault/WithdrawModal";
 import { RedeemNODOAIxDrawer } from "@/components/vault/RedeemNODOAIxDrawer";
 import { TxDrawer } from "@/components/dashboard/TxDrawer";
+import { motion } from "framer-motion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Brain,
+  BarChart,
+  Settings,
+  ArrowUpRight,
+  ChevronRight,
+  Zap
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
   const { isConnected, balance } = useWallet();
@@ -22,6 +33,8 @@ export default function Dashboard() {
   const [isRedeemDrawerOpen, setIsRedeemDrawerOpen] = useState(false);
   const [selectedTx, setSelectedTx] = useState<TransactionHistory | null>(null);
   const [isTxDrawerOpen, setIsTxDrawerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("classic");
+  const [showWelcomeModal, setShowWelcomeModal] = useState(true);
 
   const { data: investments, isLoading: loadingInvestments } = useQuery({
     queryKey: ['userInvestments'],
@@ -34,6 +47,17 @@ export default function Dashboard() {
     queryFn: vaultService.getTransactionHistory,
     enabled: isConnected,
   });
+
+  // Hide welcome modal after a delay
+  useEffect(() => {
+    if (showWelcomeModal) {
+      const timer = setTimeout(() => {
+        setShowWelcomeModal(false);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showWelcomeModal]);
 
   // Calculate performance data for chart
   const performanceData = useMemo(() => {
@@ -99,42 +123,151 @@ export default function Dashboard() {
   const totalProfit = investments?.reduce((sum, inv) => sum + inv.profit, 0) || 0;
 
   return (
-    <PageContainer className="dashboard-container mx-auto max-w-7xl pb-20">
+    <PageContainer className="dashboard-container mx-auto pb-20 relative">
+      {/* Welcome message for AI Dashboard */}
+      {showWelcomeModal && activeTab === "ai" && (
+        <motion.div
+          className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full bg-black/80 backdrop-blur-md border border-nova/30 shadow-lg shadow-nova/20 rounded-lg p-4 text-center"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="flex items-center justify-center mb-3">
+            <div className="w-10 h-10 rounded-full bg-nova/20 flex items-center justify-center">
+              <Brain size={20} className="text-nova" />
+            </div>
+          </div>
+          <h3 className="text-lg font-medium text-white mb-1">Welcome to AI Dashboard</h3>
+          <p className="text-white/70 text-sm mb-3">
+            Experience our new AI-powered insights and automated optimization tools.
+          </p>
+          <div className="flex justify-center">
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs border-white/10 bg-white/5 hover:bg-white/10"
+              onClick={() => setShowWelcomeModal(false)}
+            >
+              Got it
+            </Button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Dashboard Header */}
       <DashboardHeader
         totalValue={totalValue}
         totalProfit={totalProfit}
       />
 
-      <div className="dashboard-grid space-y-8">
-        <MetricsOverview
-          investments={investments || []}
-          isLoading={loadingInvestments}
-        />
+      {/* Dashboard View Toggle */}
+      <div className="mb-6 flex justify-end">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg p-1"
+        >
+          <TabsList className="bg-transparent">
+            <TabsTrigger
+              value="classic"
+              className="data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=inactive]:text-white/60"
+            >
+              <BarChart size={16} className="mr-2" />
+              Classic View
+            </TabsTrigger>
+            <TabsTrigger
+              value="ai"
+              className="data-[state=active]:bg-white/10 data-[state=active]:text-white data-[state=inactive]:text-white/60"
+            >
+              <Brain size={16} className="mr-2" />
+              AI Dashboard
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
 
-        {balance?.receiptTokens > 0 && (
-          <ReceiptTokenCard
-            tokens={balance.receiptTokens}
-            onRedeem={handleRedeemClick}
-          />
+      {/* View Content */}
+      <div className="relative">
+        {/* Classic Dashboard */}
+        {activeTab === "classic" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="dashboard-grid space-y-8"
+          >
+            <MetricsOverview
+              investments={investments || []}
+              isLoading={loadingInvestments}
+            />
+
+            {balance?.receiptTokens > 0 && (
+              <ReceiptTokenCard
+                tokens={balance.receiptTokens}
+                onRedeem={handleRedeemClick}
+              />
+            )}
+
+            <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-nova/10 flex items-center justify-center">
+                    <Zap size={16} className="text-nova" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium text-white">AI-Powered View Available</h3>
+                    <p className="text-sm text-white/60">Try our enhanced dashboard with AI insights and optimization</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setActiveTab("ai")}
+                  className="bg-gradient-to-r from-nova-600 to-nova-500"
+                >
+                  <Brain size={16} className="mr-2" />
+                  Switch to AI View
+                </Button>
+              </div>
+            </div>
+
+            <PositionsPanel
+              positions={investments || []}
+              isLoading={loadingInvestments}
+              onWithdraw={handleWithdrawClick}
+            />
+
+            <ActivityPanel
+              activities={activities || []}
+              isLoading={loadingActivities}
+            />
+          </motion.div>
         )}
 
-        <PerformanceChart
-          data={performanceData}
-          transactions={activities}
-          isLoading={loadingInvestments || loadingActivities}
-          onTxClick={handleTxSelect}
-        />
+        {/* AI Dashboard */}
+        {activeTab === "ai" && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            <AIInsightsDashboard />
 
-        <PositionsPanel
-          positions={investments || []}
-          isLoading={loadingInvestments}
-          onWithdraw={handleWithdrawClick}
-        />
-
-        <ActivityPanel
-          activities={activities || []}
-          isLoading={loadingActivities}
-        />
+            {/* Quick access to classic view */}
+            <div className="mt-8 flex justify-center">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-white/10 bg-black/20 hover:bg-black/30 text-white/70"
+                onClick={() => setActiveTab("classic")}
+              >
+                <BarChart size={14} className="mr-2" />
+                Switch to Classic View
+              </Button>
+            </div>
+          </motion.div>
+        )}
       </div>
 
       {/* Transaction Drawer */}
