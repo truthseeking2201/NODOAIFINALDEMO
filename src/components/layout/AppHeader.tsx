@@ -4,7 +4,6 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ConnectWalletButton } from "@/components/wallet/ConnectWalletButton";
-import { AIStatusIndicator } from "@/components/ai/AIStatusIndicator";
 import {
   Bell,
   X,
@@ -253,16 +252,7 @@ export function AppHeader() {
               </motion.div>
             </div>
 
-            {/* AI Status Indicator */}
-            <div className="hidden lg:block">
-              <AIStatusIndicator
-                mode={aiActivityMode}
-                theme="nova"
-                active={true}
-                showHistory={false}
-                expandable={true}
-              />
-            </div>
+            {/* AI Status Indicator removed */}
           </Link>
 
           {/* Desktop Navigation */}
@@ -292,67 +282,7 @@ export function AppHeader() {
               </div>
             </Link>
 
-            {/* AI Features Dropdown */}
-            <DropdownMenu onOpenChange={setShowAiDropdown}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className={`px-3 py-2 h-auto rounded-lg transition-colors text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 ${showAiDropdown ? 'bg-white/5' : ''}`}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <Brain size={14} className={showAiDropdown ? 'text-nova' : ''} />
-                    <span>AI Features</span>
-                    <ChevronDown size={14} className={`transition-transform ${showAiDropdown ? 'rotate-180' : ''}`} />
-                  </div>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-[#171923]/90 backdrop-blur-xl border border-white/10 text-white shadow-xl rounded-xl w-64 p-1">
-                <div className="px-2 py-1.5 text-xs text-white/40 border-b border-white/5 mb-1">
-                  NODO AI CAPABILITIES
-                </div>
-                <DropdownMenuItem className="flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer hover:bg-white/5">
-                  <div className="w-8 h-8 rounded-lg bg-[#1A1D2A] flex items-center justify-center text-nova">
-                    <Brain size={18} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">AI Assistant</div>
-                    <div className="text-xs text-white/60">Get personalized help</div>
-                  </div>
-                  <ChevronRight size={14} className="text-white/40" />
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer hover:bg-white/5">
-                  <div className="w-8 h-8 rounded-lg bg-[#1A1D2A] flex items-center justify-center text-emerald">
-                    <Sparkles size={18} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">Yield Optimizer</div>
-                    <div className="text-xs text-white/60">Auto-optimize returns</div>
-                  </div>
-                  <ChevronRight size={14} className="text-white/40" />
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer hover:bg-white/5">
-                  <div className="w-8 h-8 rounded-lg bg-[#1A1D2A] flex items-center justify-center text-orion">
-                    <ShieldCheck size={18} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">Risk Analysis</div>
-                    <div className="text-xs text-white/60">Smart risk assessment</div>
-                  </div>
-                  <ChevronRight size={14} className="text-white/40" />
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="my-1 bg-white/5" />
-                <DropdownMenuItem className="flex items-center gap-2 px-2 py-2 rounded-lg cursor-pointer hover:bg-white/5">
-                  <div className="w-8 h-8 rounded-lg bg-[#1A1D2A] flex items-center justify-center text-white/60">
-                    <SlidersHorizontal size={16} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">AI Settings</div>
-                    <div className="text-xs text-white/60">Customize AI behavior</div>
-                  </div>
-                  <div className="text-[10px] px-1.5 py-0.5 rounded-full bg-nova text-white">NEW</div>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* AI Features Dropdown removed */}
           </nav>
         </div>
 
@@ -480,16 +410,7 @@ export function AppHeader() {
                 </div>
               </div>
 
-              {/* Mobile AI Status */}
-              <div className="p-3 border-b border-white/5">
-                <AIStatusIndicator
-                  mode={aiActivityMode}
-                  theme="nova"
-                  active={true}
-                  showHistory={false}
-                  expandable={false}
-                />
-              </div>
+              {/* Mobile AI Status removed */}
 
               {/* Navigation Links */}
               <nav className="flex flex-col p-2">
@@ -519,31 +440,7 @@ export function AppHeader() {
                 </Link>
               </nav>
 
-              {/* AI Features */}
-              <div className="p-2">
-                <div className="p-2 text-xs font-medium text-white/50">AI FEATURES</div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2 p-3 rounded-lg hover:bg-white/5 text-white/80">
-                    <Brain size={16} className="text-nova" />
-                    <span className="font-medium">AI Assistant</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-3 rounded-lg hover:bg-white/5 text-white/80">
-                    <Sparkles size={16} className="text-emerald" />
-                    <span className="font-medium">Yield Optimizer</span>
-                  </div>
-                  <div className="flex items-center gap-2 p-3 rounded-lg hover:bg-white/5 text-white/80">
-                    <ShieldCheck size={16} className="text-orion" />
-                    <span className="font-medium">Risk Analysis</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-2 p-3 rounded-lg hover:bg-white/5 text-white/80">
-                    <div className="flex items-center gap-2">
-                      <SlidersHorizontal size={16} className="text-white/60" />
-                      <span className="font-medium">AI Settings</span>
-                    </div>
-                    <div className="text-[10px] px-1.5 py-0.5 rounded-full bg-nova text-white">NEW</div>
-                  </div>
-                </div>
-              </div>
+              {/* AI Features section removed */}
 
               {/* Close button */}
               <div className="p-3 border-t border-white/5">

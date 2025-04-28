@@ -107,15 +107,21 @@ export function VaultCard({
               </div>
               <div>
                 <CardTitle className="vault-name text-white">
-                  {styles.vaultCategory} Vault
+                  {vault.name}
                 </CardTitle>
                 <CardDescription className="vault-description text-white/60">
                   {vault.description}
                 </CardDescription>
               </div>
             </div>
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${styles.riskColor}`}>
-              {styles.riskText}
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+              vault.riskLevel === 'low' ? 'bg-emerald/10 text-emerald' :
+              vault.riskLevel === 'medium' ? 'bg-orion/10 text-orion' :
+              'bg-red-500/10 text-red-500'
+            }`}>
+              {vault.riskLevel === 'low' ? 'Low Risk' :
+               vault.riskLevel === 'medium' ? 'Medium Risk' :
+               'High Risk'}
             </span>
           </div>
         </CardHeader>

@@ -13,8 +13,8 @@ import { LoadingState } from "@/components/shared/LoadingState";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import { UnifiedActivityFeed } from "@/components/vault/UnifiedActivityFeed";
 import { NeuralActivityTicker } from "@/components/vault/NeuralActivityTicker";
-import { FeaturedVaultPill } from "@/components/vault/FeaturedVaultPill";
 import { VaultCarousel } from "@/components/vault/VaultCarousel";
+import { NODOAIxPromoBanner } from "@/components/vault/NODOAIxPromoBanner";
 import { Vault } from "@/types";
 import { VaultData } from "@/types/vault";
 import { adaptVaultsToVaultData } from "@/utils/vaultAdapter";
@@ -142,17 +142,7 @@ export default function VaultCatalog() {
           </AnimatePresence>
         </motion.section>
 
-        {/* Featured vaults capsules - internal pool names are hidden from users */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.8 }}
-          className="px-4 flex flex-wrap justify-center gap-4 mt-8 mb-12"
-        >
-          <FeaturedVaultPill label="Trending" vaultName="DEEP-SUI" type="nova" metric="+24.8% APR" />
-          <FeaturedVaultPill label="Most Stable" vaultName="SUI-USDC" type="emerald" metric="12.5% APR" />
-          <FeaturedVaultPill label="Popular" vaultName="CETUS-SUI" type="orion" metric="$2.1M TVL" />
-        </motion.section>
+        {/* Featured vaults section removed */}
 
         {/* Mobile carousel for small screens */}
         <AnimatePresence>
@@ -248,6 +238,24 @@ export default function VaultCatalog() {
                 message="There are no vaults available at this time. Please check back later."
               />
             )}
+          </div>
+        </motion.section>
+
+        {/* NODOAIx Section */}
+        <motion.section
+          className="component-spacing px-4"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6, duration: 0.8 }}
+        >
+          <div className="max-w-screen-xl mx-auto">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-white">
+                <span className="gradient-text-amber">NODOAIx</span> Tokens
+              </h2>
+              <p className="text-white/70 mt-2">Intelligent yield optimization receipts with exclusive benefits</p>
+            </div>
+            <NODOAIxPromoBanner />
           </div>
         </motion.section>
 
