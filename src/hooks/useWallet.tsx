@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { useCallback, useEffect, useState } from 'react'
 
-type WalletType = 'sui' | 'phantom' | 'martian';
+// Simplified wallet types - removed reference to specific crypto wallets
+type WalletType = 'demo';
 
 interface WalletState {
   address: string | null
@@ -30,7 +31,7 @@ const useWalletStore = create<WalletState>((set) => ({
   isConnecting: false,
   isModalOpen: false,
   isWalletDialogOpen: false,
-  walletType: 'sui',
+  walletType: 'demo',
   balance: {
     usdc: 1250.45,
     receiptTokens: 125.2
@@ -101,26 +102,23 @@ export const useWallet = () => {
     vaultName?: string;
   } | null>(null);
 
-  // Automatically reconnect if previously connected
+  // Automatically reconnect if previously connected - using localStorage only, no wallet APIs
   useEffect(() => {
     const hasConnectedBefore = localStorage.getItem('wallet-connected') === 'true'
-    const savedWalletType = localStorage.getItem('wallet-type') as WalletType | null
 
-    if (hasConnectedBefore && !isConnected && !isConnecting && savedWalletType) {
-      connect(savedWalletType)
+    if (hasConnectedBefore && !isConnected && !isConnecting) {
+      connect('demo')
     }
   }, [connect, isConnected, isConnecting])
 
   // Save connection state to localStorage
   useEffect(() => {
-    if (isConnected && walletType) {
+    if (isConnected) {
       localStorage.setItem('wallet-connected', 'true')
-      localStorage.setItem('wallet-type', walletType)
     } else {
       localStorage.removeItem('wallet-connected')
-      localStorage.removeItem('wallet-type')
     }
-  }, [isConnected, walletType])
+  }, [isConnected])
 
   // Function to open wallet modal specifically for connection
   const openConnectModal = useCallback(() => {
@@ -131,7 +129,7 @@ export const useWallet = () => {
     setIsConnectModalOpen(false);
   }, []);
 
-  // Function to handle transaction signing
+  // Simplified transaction signing without external wallet integration
   const signTransaction = useCallback((transactionType: 'deposit' | 'withdraw', amount?: string, vaultName?: string) => {
     setCurrentTransaction({
       type: transactionType,
@@ -141,27 +139,18 @@ export const useWallet = () => {
     setIsSignatureDialogOpen(true);
 
     return new Promise<void>((resolve) => {
-      // Add a function to window to be called when signature is complete
-      window.signatureComplete = () => {
+      // Simulate transaction signing
+      setTimeout(() => {
         setIsSignatureDialogOpen(false);
         setCurrentTransaction(null);
         resolve();
-      };
-
-      // Add an automatic timeout to resolve the promise after 10 seconds
-      // This prevents the UI from getting stuck if there's an issue
-      setTimeout(() => {
-        if (window.signatureComplete) {
-          window.signatureComplete();
-        }
-      }, 10000);
+      }, 1500);
     });
   }, []);
 
   const handleSignatureComplete = useCallback(() => {
-    if (window.signatureComplete) {
-      window.signatureComplete();
-    }
+    setIsSignatureDialogOpen(false);
+    setCurrentTransaction(null);
   }, []);
 
   // Function for deposit that includes signing
@@ -176,9 +165,7 @@ export const useWallet = () => {
       await signTransaction('deposit', amount.toString(), vaultId);
 
       // After signature, add NODOAIx Tokens
-      // NODOAIx Tokens represent the user's share of the vault's assets
-      // They are non-transferable, yield interest over time, and automatically burn upon withdrawal
-      const receiptTokenAmount = amount * 0.98; // 98% of deposit amount converted to NODOAIx Tokens
+      const receiptTokenAmount = amount * 0.98;
       addReceiptTokens(receiptTokenAmount);
 
       // Return success
@@ -204,9 +191,7 @@ export const useWallet = () => {
       await signTransaction('withdraw', amount.toString(), vaultId);
 
       // After signature, burn NODOAIx Tokens
-      // NODOAIx Tokens automatically burn upon withdrawal, converting back to USDC
-      // with accrued interest based on lockup period and vault performance
-      const receiptTokenAmount = amount * 0.98; // 98% of withdrawal amount in NODOAIx Tokens
+      const receiptTokenAmount = amount * 0.98;
       addReceiptTokens(-receiptTokenAmount);
 
       // Return success
@@ -244,13 +229,5 @@ export const useWallet = () => {
     signTransaction,
     deposit,
     withdraw
-  }
-}
-
-// Add signatureComplete function to window type
-declare global {
-  interface Window {
-    signatureComplete?: () => void;
-    updateWalletBalance?: () => void;
   }
 }

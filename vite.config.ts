@@ -10,7 +10,10 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react(),
+    react({
+      // Use default settings to ensure compatibility
+      jsxImportSource: "react",
+    }),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
@@ -18,5 +21,14 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  esbuild: {
+    jsx: 'automatic',
+    jsxInject: `import React from 'react'`
+  },
+  // Disable minification for development/debugging
+  build: {
+    minify: mode === 'production',
+    sourcemap: true,
   },
 }));

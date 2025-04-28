@@ -1,19 +1,17 @@
 
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, Info, TrendingUp, Clock, ExternalLink, Brain } from "lucide-react";
+import { ArrowRight, Info, Brain } from "lucide-react";
 import { VaultData } from "@/types/vault";
-import { TokenIcon, PairIcon } from "@/components/shared/TokenIcons";
+import { PairIcon } from "@/components/shared/TokenIcons";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useWallet } from "@/hooks/useWallet";
-import { useDepositDrawer } from "@/hooks/useDepositDrawer";
 import { AIIndicator } from "./AIIndicator";
 
 interface VaultCardProps {
@@ -23,6 +21,53 @@ interface VaultCardProps {
   isActive: boolean;
   onHover: () => void;
 }
+
+// Memoize static style configurations for better performance
+const styleConfigs = {
+  nova: {
+    gradientText: 'gradient-text-nova',
+    gradientBg: 'bg-gradient-to-r from-nova via-nova-light to-nova-dark',
+    accent: 'text-nova-light',
+    border: 'border-nova/20',
+    riskColor: 'bg-red-500/10 text-red-500',
+    riskText: 'High Yield',
+    vaultCategory: 'Aggressive',
+    buttonVariant: 'neural-orange' as const // Using neural-orange for all CTAs
+  },
+  orion: {
+    gradientText: 'gradient-text-orion',
+    gradientBg: 'bg-gradient-to-r from-orion via-orion-light to-orion-dark',
+    accent: 'text-orion-light',
+    border: 'border-orion/20',
+    riskColor: 'bg-orion/10 text-orion',
+    riskText: 'Balanced',
+    vaultCategory: 'Moderate',
+    buttonVariant: 'neural-orange' as const // Using neural-orange for all CTAs
+  },
+  emerald: {
+    gradientText: 'gradient-text-emerald',
+    gradientBg: 'bg-gradient-to-r from-emerald via-emerald-light to-emerald-dark',
+    accent: 'text-emerald-light',
+    border: 'border-emerald/20',
+    riskColor: 'bg-emerald/10 text-emerald',
+    riskText: 'Stable',
+    vaultCategory: 'Conservative',
+    buttonVariant: 'neural-orange' as const // Using neural-orange for all CTAs
+  }
+};
+
+// Memoize risk level styles
+const riskLevelStyles = {
+  low: 'bg-emerald/10 text-emerald',
+  medium: 'bg-orion/10 text-orion',
+  high: 'bg-red-500/10 text-red-500'
+};
+
+const riskLevelText = {
+  low: 'Low Risk',
+  medium: 'Medium Risk',
+  high: 'High Risk'
+};
 
 export function VaultCard({
   vault,
@@ -34,62 +79,40 @@ export function VaultCard({
   const navigate = useNavigate();
   const [showRoiOverlay, setShowRoiOverlay] = useState(false);
 
-  const getVaultStyles = (type: 'nova' | 'orion' | 'emerald') => {
-    switch (type) {
-      case 'nova':
-        return {
-          gradientText: 'gradient-text-nova',
-          gradientBg: 'bg-gradient-to-r from-nova via-nova-light to-nova-dark',
-          accent: 'text-nova-light',
-          border: 'border-nova/20',
-          riskColor: 'bg-red-500/10 text-red-500',
-          riskText: 'High Yield',
-          vaultCategory: 'Aggressive',
-          buttonVariant: 'neural-orange' as const // Using neural-orange for all CTAs
-        };
-      case 'orion':
-        return {
-          gradientText: 'gradient-text-orion',
-          gradientBg: 'bg-gradient-to-r from-orion via-orion-light to-orion-dark',
-          accent: 'text-orion-light',
-          border: 'border-orion/20',
-          riskColor: 'bg-orion/10 text-orion',
-          riskText: 'Balanced',
-          vaultCategory: 'Moderate',
-          buttonVariant: 'neural-orange' as const // Using neural-orange for all CTAs
-        };
-      case 'emerald':
-        return {
-          gradientText: 'gradient-text-emerald',
-          gradientBg: 'bg-gradient-to-r from-emerald via-emerald-light to-emerald-dark',
-          accent: 'text-emerald-light',
-          border: 'border-emerald/20',
-          riskColor: 'bg-emerald/10 text-emerald',
-          riskText: 'Stable',
-          vaultCategory: 'Conservative',
-          buttonVariant: 'neural-orange' as const // Using neural-orange for all CTAs
-        };
-    }
-  };
+  // Memoize styles based on vault type to avoid recalculation on every render
+  const styles = useMemo(() => styleConfigs[vault.type], [vault.type]);
 
-  const handleDepositClick = () => {
+  // Calculate and memoize values that don't need to be recalculated every render
+  const monthlyReturn = useMemo(() => (vault.apr / 100 / 12) * 1000, [vault.apr]);
+  const formattedTvl = useMemo(() => `$${(vault.tvl / 1000000).toFixed(1)}M`, [vault.tvl]);
+  const userCount = useMemo(() => Math.floor(vault.tvl / 25000), [vault.tvl]);
+  const aiInsight = useMemo(() => `${(Math.random() * 0.5).toFixed(1)}% optimization today`, []);
+
+  // Memoize risk level styles
+  const riskStyle = useMemo(() => riskLevelStyles[vault.riskLevel], [vault.riskLevel]);
+  const riskDescription = useMemo(() => riskLevelText[vault.riskLevel], [vault.riskLevel]);
+
+  // Memoize event handlers to avoid recreating functions on every render
+  const handleDepositClick = useCallback(() => {
     navigate(`/vaults/${vault.id}`);
-  };
+  }, [navigate, vault.id]);
 
-  const styles = getVaultStyles(vault.type);
-  const monthlyReturn = (vault.apr / 100 / 12) * 1000;
-  const aiInsight = `${(Math.random() * 0.5).toFixed(1)}% optimization today`;
+  const handleMouseEnter = useCallback(() => {
+    onHover();
+    setShowRoiOverlay(true);
+  }, [onHover]);
+
+  const handleMouseLeave = useCallback(() => {
+    setShowRoiOverlay(false);
+  }, []);
 
   return (
     <TooltipProvider>
       <Card
         className={`group relative overflow-hidden rounded-xl border-0 bg-black/40 backdrop-blur-2xl transition-all duration-300
           hover:scale-[1.02] hover:shadow-elevation-2 ${isActive ? 'ring-2 ring-white/20' : ''}`}
-        onMouseEnter={() => {
-          onHover();
-          setShowRoiOverlay(true);
-        }}
-        onMouseLeave={() => setShowRoiOverlay(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-transparent opacity-0
           transition-opacity duration-300 group-hover:opacity-100" />
@@ -114,14 +137,8 @@ export function VaultCard({
                 </CardDescription>
               </div>
             </div>
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-              vault.riskLevel === 'low' ? 'bg-emerald/10 text-emerald' :
-              vault.riskLevel === 'medium' ? 'bg-orion/10 text-orion' :
-              'bg-red-500/10 text-red-500'
-            }`}>
-              {vault.riskLevel === 'low' ? 'Low Risk' :
-               vault.riskLevel === 'medium' ? 'Medium Risk' :
-               'High Risk'}
+            <span className={`text-xs font-medium px-2 py-1 rounded-full ${riskStyle}`}>
+              {riskDescription}
             </span>
           </div>
         </CardHeader>
@@ -147,13 +164,13 @@ export function VaultCard({
             <div className="space-y-1">
               <p className="text-xs text-white/60">TVL</p>
               <p className="metric-value text-white">
-                ${(vault.tvl / 1000000).toFixed(1)}M
+                {formattedTvl}
               </p>
             </div>
             <div className="space-y-1">
               <p className="text-xs text-white/60">Users</p>
               <p className="metric-value text-white">
-                {Math.floor(vault.tvl / 25000)}
+                {userCount}
               </p>
             </div>
           </div>

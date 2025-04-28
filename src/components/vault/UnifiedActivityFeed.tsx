@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowUpRight,
@@ -32,16 +32,134 @@ interface UnifiedActivityFeedProps {
   className?: string;
 }
 
+// Memoized activity item components for better performance
+const AIActivityItem = memo(({ activity, onReasoningClick }: {
+  activity: Activity,
+  onReasoningClick: (activity: Activity) => void
+}) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3 }}
+    className="bg-white/[0.03] border border-white/5 rounded-xl p-3 hover:bg-white/[0.05] transition-colors"
+  >
+    <div className="flex items-start justify-between">
+      <div className="flex items-start space-x-3">
+        <div className="mt-0.5">
+          <div className="h-8 w-8 rounded-full bg-nova/10 flex items-center justify-center">
+            <Brain size={16} className="text-nova" />
+          </div>
+        </div>
+        <div>
+          <div className="flex items-center text-sm font-medium text-white space-x-1">
+            <span>AI optimized</span>
+            <span className="text-white">Vault</span>
+          </div>
+          <div className="text-xs text-white/60 mt-1">
+            <div className="flex items-center">
+              <span>{activity.aiAction}</span>
+              <span className="mx-1.5">•</span>
+              <span className="text-emerald font-medium">{activity.aiResult}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="text-[10px] text-white/40 font-mono mt-1">
+          {getTimeAgo(activity.timestamp)} ago
+        </div>
+        <button
+          onClick={() => onReasoningClick(activity)}
+          className="flex items-center justify-center h-6 w-6 rounded-full bg-nova/10 hover:bg-nova/20 transition-colors group"
+          aria-label="Show reasoning"
+        >
+          <Sparkles size={14} className="text-nova animate-pulse group-hover:animate-none" />
+        </button>
+      </div>
+    </div>
+  </motion.div>
+));
+
+const TransactionItem = memo(({ activity }: { activity: Activity }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3 }}
+    className="bg-white/[0.03] border border-white/5 rounded-xl p-3 hover:bg-white/[0.05] transition-colors"
+  >
+    <div className="flex items-start justify-between">
+      <div className="flex items-start space-x-3">
+        <div className="mt-0.5">
+          {activity.type === "deposit" && (
+            <div className="h-8 w-8 rounded-full bg-emerald/10 flex items-center justify-center">
+              <ArrowUpRight size={16} className="text-emerald" />
+            </div>
+          )}
+          {activity.type === "withdraw" && (
+            <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
+              <ArrowDownRight size={16} className="text-red-500" />
+            </div>
+          )}
+        </div>
+        <div>
+          <div className="flex items-center text-sm font-medium text-white space-x-1">
+            {activity.type === "deposit" && <span>Deposit to</span>}
+            {activity.type === "withdraw" && <span>Withdraw from</span>}
+            <span className="text-white">Vault</span>
+          </div>
+          <div className="text-xs text-white/60 mt-1">
+            <div className="flex items-center">
+              <span className="font-mono font-medium text-white/80">
+                {formatCurrency(activity.amount || 0)}
+              </span>
+              <span className="mx-1.5">•</span>
+              <span className="font-mono">0x...{activity.user}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="text-[10px] text-white/40 font-mono mt-1">
+        {getTimeAgo(activity.timestamp)} ago
+      </div>
+    </div>
+  </motion.div>
+));
+
+// Reusable format functions
+const getTimeAgo = (date: Date): string => {
+  const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
+
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  return `${Math.floor(hours / 24)}d`;
+};
+
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0
+  }).format(value);
+};
+
 export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [isReasoningDrawerOpen, setIsReasoningDrawerOpen] = useState(false);
+  const [currentTab, setCurrentTab] = useState<'ai-activity' | 'my-transactions'>('ai-activity');
 
-  // Get transaction history from vault service
+  // Get transaction history from vault service with staleTime for caching
   const { data: transactions, refetch } = useQuery({
     queryKey: ["transactions"],
     queryFn: () => vaultService.getTransactionHistory(),
     refetchOnWindowFocus: false,
+    staleTime: 30000, // 30 seconds
+    cacheTime: 300000, // 5 minutes
   });
 
   // Generate simulated activities
@@ -147,34 +265,13 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
       },
     ];
 
-    // Combine and sort all activities
+    // Combine and sort all activities - use useMemo to avoid unnecessary recalculations
     const allActivities = [...txActivities, ...aiActivities].sort((a, b) =>
       b.timestamp.getTime() - a.timestamp.getTime()
     );
 
     setActivities(allActivities);
   }, [transactions]);
-
-  // Format time ago
-  const getTimeAgo = (date: Date): string => {
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-
-    if (seconds < 60) return `${seconds}s`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes}m`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours}h`;
-    return `${Math.floor(hours / 24)}d`;
-  };
-
-  // Format currency
-  const formatCurrency = (value: number): string => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 0
-    }).format(value);
-  };
 
   // Open reasoning drawer with selected activity
   const openReasoningDrawer = (activity: Activity) => {
@@ -195,14 +292,24 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
     setIsReasoningDrawerOpen(true);
   };
 
-  // Filter activities by type
-  const aiActivities = activities.filter(a => a.type === 'ai');
-  const userActivities = activities.filter(a => a.type === 'deposit' || a.type === 'withdraw');
+  // Filter activities by type - memoized to avoid recreating arrays on each render
+  const aiActivities = useMemo(() =>
+    activities.filter(a => a.type === 'ai'),
+  [activities]);
+
+  const userActivities = useMemo(() =>
+    activities.filter(a => a.type === 'deposit' || a.type === 'withdraw'),
+  [activities]);
 
   return (
     <div className={`${className}`}>
       <div className="flex justify-between items-center mb-4">
-        <Tabs defaultValue="ai-activity" className="w-full">
+        <Tabs
+          defaultValue="ai-activity"
+          value={currentTab}
+          onValueChange={(value) => setCurrentTab(value as 'ai-activity' | 'my-transactions')}
+          className="w-full"
+        >
           <TabsList className="grid grid-cols-2 mb-6 bg-white/5 rounded-lg p-1">
             <TabsTrigger
               value="ai-activity"
@@ -247,51 +354,12 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
             <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
               <AnimatePresence initial={false}>
                 {aiActivities.length > 0 ? (
-                  aiActivities.map((activity, index) => (
-                    <motion.div
+                  aiActivities.map((activity) => (
+                    <AIActivityItem
                       key={activity.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="bg-white/[0.03] border border-white/5 rounded-xl p-3 hover:bg-white/[0.05] transition-colors"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-3">
-                          <div className="mt-0.5">
-                            <div className="h-8 w-8 rounded-full bg-nova/10 flex items-center justify-center">
-                              <Brain size={16} className="text-nova" />
-                            </div>
-                          </div>
-                          <div>
-                            <div className="flex items-center text-sm font-medium text-white space-x-1">
-                              <span>AI optimized</span>
-                              {/* Don't show raw pool name to user */}
-                              <span className="text-white">Vault</span>
-                            </div>
-                            <div className="text-xs text-white/60 mt-1">
-                              <div className="flex items-center">
-                                <span>{activity.aiAction}</span>
-                                <span className="mx-1.5">•</span>
-                                <span className="text-emerald font-medium">{activity.aiResult}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="text-[10px] text-white/40 font-mono mt-1">
-                            {getTimeAgo(activity.timestamp)} ago
-                          </div>
-                          <button
-                            onClick={() => openReasoningDrawer(activity)}
-                            className="flex items-center justify-center h-6 w-6 rounded-full bg-nova/10 hover:bg-nova/20 transition-colors group"
-                            aria-label="Show reasoning"
-                          >
-                            <Sparkles size={14} className="text-nova animate-pulse group-hover:animate-none" />
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
+                      activity={activity}
+                      onReasoningClick={openReasoningDrawer}
+                    />
                   ))
                 ) : (
                   <div className="text-center py-8 text-white/40">
@@ -306,52 +374,8 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
             <div className="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
               <AnimatePresence initial={false}>
                 {userActivities.length > 0 ? (
-                  userActivities.map((activity, index) => (
-                    <motion.div
-                      key={activity.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="bg-white/[0.03] border border-white/5 rounded-xl p-3 hover:bg-white/[0.05] transition-colors"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-start space-x-3">
-                          <div className="mt-0.5">
-                            {activity.type === "deposit" && (
-                              <div className="h-8 w-8 rounded-full bg-emerald/10 flex items-center justify-center">
-                                <ArrowUpRight size={16} className="text-emerald" />
-                              </div>
-                            )}
-                            {activity.type === "withdraw" && (
-                              <div className="h-8 w-8 rounded-full bg-red-500/10 flex items-center justify-center">
-                                <ArrowDownRight size={16} className="text-red-500" />
-                              </div>
-                            )}
-                          </div>
-                          <div>
-                            <div className="flex items-center text-sm font-medium text-white space-x-1">
-                              {activity.type === "deposit" && <span>Deposit to</span>}
-                              {activity.type === "withdraw" && <span>Withdraw from</span>}
-                              {/* Don't show raw pool names to user */}
-                              <span className="text-white">Vault</span>
-                            </div>
-                            <div className="text-xs text-white/60 mt-1">
-                              <div className="flex items-center">
-                                <span className="font-mono font-medium text-white/80">
-                                  {formatCurrency(activity.amount || 0)}
-                                </span>
-                                <span className="mx-1.5">•</span>
-                                <span className="font-mono">0x...{activity.user}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-[10px] text-white/40 font-mono mt-1">
-                          {getTimeAgo(activity.timestamp)} ago
-                        </div>
-                      </div>
-                    </motion.div>
+                  userActivities.map((activity) => (
+                    <TransactionItem key={activity.id} activity={activity} />
                   ))
                 ) : (
                   <div className="text-center py-8 text-white/40">

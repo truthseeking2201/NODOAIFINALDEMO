@@ -1,102 +1,63 @@
 import { VaultData, UserInvestment, TransactionHistory } from "@/types/vault";
 import { Vault } from "@/types";
 
-// Mock data for the vaults
-const mockVaults: VaultData[] = [
-  {
-    id: "sui-usdc",
-    name: "SUI-USDC",
-    type: "emerald",
-    tvl: 3000000,
-    apr: 12.5,
-    apy: 13.8,
-    description: "A low-risk vault utilizing the SUI ↔ USDC trading pair with relatively low price volatility and impermanent loss risk.",
-    lockupPeriods: [
-      { days: 30, aprBoost: 0 },
-      { days: 60, aprBoost: 1.2 },
-      { days: 90, aprBoost: 2.5 }
-    ],
-    riskLevel: "low",
-    strategy: "Optimized position management in the SUI-USDC concentrated liquidity pool, aiming to outperform static LP by ≥3%.",
-    performance: {
-      daily: Array.from({ length: 30 }, (_, i) => ({
-        date: new Date(Date.now() - (29-i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        value: 100 + (Math.sin(i / 4) + 1) * 3 + i / 10
-      })),
-      weekly: Array.from({ length: 12 }, (_, i) => ({
-        date: `Week ${i + 1}`,
-        value: 100 + (Math.sin(i / 2) + 1) * 4 + i / 6
-      })),
-      monthly: Array.from({ length: 6 }, (_, i) => ({
-        date: `Month ${i + 1}`,
-        value: 100 + (Math.sin(i) + 1) * 5 + i
-      }))
+// Memoized mock data - only create these once
+const createMockVaults = (): Vault[] => {
+  const vaults = [
+    {
+      id: 'deep-sui',
+      name: 'DEEP-SUI',
+      tvl: 1250000,
+      apr: 24.8,
+      riskLevel: 'High',
+      strategy: 'Aggressive position management in the DEEP-SUI concentrated liquidity pool, maximizing yield capture in volatile market conditions.',
+      tokens: ['DEEP', 'SUI'],
+      description: 'A high-risk, high-reward vault leveraging the DEEP ↔ SUI trading pair in high-spread, low-liquidity conditions.',
+      performance: {
+        day: 0.08,
+        week: 0.54,
+        month: 2.1,
+        allTime: 27.9
+      }
+    },
+    {
+      id: 'cetus-sui',
+      name: 'CETUS-SUI',
+      tvl: 2100000,
+      apr: 18.7,
+      riskLevel: 'Medium',
+      strategy: 'Active position management in the CETUS-SUI concentrated liquidity pool, optimizing for fee capture while mitigating impermanent loss.',
+      tokens: ['CETUS', 'SUI'],
+      description: 'A moderate-risk vault focusing on the CETUS ↔ SUI trading pair, balancing yield potential with managed volatility.',
+      performance: {
+        day: 0.05,
+        week: 0.38,
+        month: 1.6,
+        allTime: 20.4
+      }
+    },
+    {
+      id: 'sui-usdc',
+      name: 'SUI-USDC',
+      tvl: 3000000,
+      apr: 12.5,
+      riskLevel: 'Low',
+      strategy: 'Optimized position management in the SUI-USDC concentrated liquidity pool, aiming to outperform static LP by ≥3%.',
+      tokens: ['SUI', 'USDC'],
+      description: 'A low-risk vault utilizing the SUI ↔ USDC trading pair with relatively low price volatility and impermanent loss risk.',
+      performance: {
+        day: 0.03,
+        week: 0.25,
+        month: 1.0,
+        allTime: 13.8
+      }
     }
-  },
-  {
-    id: "cetus-sui",
-    name: "CETUS-SUI",
-    type: "orion",
-    tvl: 2100000,
-    apr: 18.7,
-    apy: 20.4,
-    description: "A moderate-risk vault focusing on the CETUS ↔ SUI trading pair, balancing yield potential with managed volatility.",
-    lockupPeriods: [
-      { days: 30, aprBoost: 0 },
-      { days: 60, aprBoost: 1.7 },
-      { days: 90, aprBoost: 3.5 }
-    ],
-    riskLevel: "medium",
-    strategy: "Active position management in the CETUS-SUI concentrated liquidity pool, optimizing for fee capture while mitigating impermanent loss.",
-    performance: {
-      daily: Array.from({ length: 30 }, (_, i) => ({
-        date: new Date(Date.now() - (29-i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        value: 100 + (Math.sin(i / 5) + 0.5) * 1.5 + i / 15
-      })),
-      weekly: Array.from({ length: 12 }, (_, i) => ({
-        date: `Week ${i + 1}`,
-        value: 100 + (Math.sin(i / 3) + 0.5) * 2 + i / 6
-      })),
-      monthly: Array.from({ length: 6 }, (_, i) => ({
-        date: `Month ${i + 1}`,
-        value: 100 + (Math.sin(i) + 0.5) * 3 + i / 2
-      }))
-    }
-  },
-  {
-    id: "deep-sui",
-    name: "DEEP-SUI",
-    type: "nova",
-    tvl: 1250000,
-    apr: 24.8,
-    apy: 27.9,
-    description: "A high-risk, high-reward vault leveraging the DEEP ↔ SUI trading pair in high-spread, low-liquidity conditions.",
-    lockupPeriods: [
-      { days: 30, aprBoost: 0 },
-      { days: 60, aprBoost: 2.5 },
-      { days: 90, aprBoost: 5.0 }
-    ],
-    riskLevel: "high",
-    strategy: "Aggressive position management in the DEEP-SUI concentrated liquidity pool, maximizing yield capture in volatile market conditions.",
-    performance: {
-      daily: Array.from({ length: 30 }, (_, i) => ({
-        date: new Date(Date.now() - (29-i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        value: 100 + (Math.sin(i / 3) + 1.2) * 4 + i / 8
-      })),
-      weekly: Array.from({ length: 12 }, (_, i) => ({
-        date: `Week ${i + 1}`,
-        value: 100 + (Math.sin(i / 1.5) + 1.2) * 5 + i / 1.5
-      })),
-      monthly: Array.from({ length: 6 }, (_, i) => ({
-        date: `Month ${i + 1}`,
-        value: 100 + (Math.sin(i) + 1.2) * 7 + i * 1.2
-      }))
-    }
-  }
-];
+  ];
+  return vaults;
+};
 
 // Mock user investments - Remove NODOAIx investment
-const mockUserInvestments: UserInvestment[] = [
+const createMockUserInvestments = (): UserInvestment[] => [
   {
     vaultId: "deep-sui",
     principal: 500,
@@ -124,7 +85,7 @@ const mockUserInvestments: UserInvestment[] = [
 ];
 
 // Mock transaction history - Enhanced with more recent transactions for better demo
-const mockTransactions: TransactionHistory[] = [
+const createMockTransactions = (): TransactionHistory[] => [
   // Recent transactions (matching those in EnhancedActivitySection)
   {
     id: "user-1",
@@ -200,94 +161,79 @@ export interface Transaction {
   vaultName: string;
 }
 
+// Cache for API responses
+const cache = {
+  vaults: null as Vault[] | null,
+  investments: null as UserInvestment[] | null,
+  transactions: null as TransactionHistory[] | null
+};
+
 export class VaultService {
-  private vaults: Vault[] = [
-    {
-      id: 'deep-sui',
-      name: 'DEEP-SUI',
-      tvl: 1250000,
-      apr: 24.8,
-      riskLevel: 'High',
-      strategy: 'Aggressive position management in the DEEP-SUI concentrated liquidity pool, maximizing yield capture in volatile market conditions.',
-      tokens: ['DEEP', 'SUI'],
-      description: 'A high-risk, high-reward vault leveraging the DEEP ↔ SUI trading pair in high-spread, low-liquidity conditions.',
-      performance: {
-        day: 0.08,
-        week: 0.54,
-        month: 2.1,
-        allTime: 27.9
-      }
-    },
-    {
-      id: 'cetus-sui',
-      name: 'CETUS-SUI',
-      tvl: 2100000,
-      apr: 18.7,
-      riskLevel: 'Medium',
-      strategy: 'Active position management in the CETUS-SUI concentrated liquidity pool, optimizing for fee capture while mitigating impermanent loss.',
-      tokens: ['CETUS', 'SUI'],
-      description: 'A moderate-risk vault focusing on the CETUS ↔ SUI trading pair, balancing yield potential with managed volatility.',
-      performance: {
-        day: 0.05,
-        week: 0.38,
-        month: 1.6,
-        allTime: 20.4
-      }
-    },
-    {
-      id: 'sui-usdc',
-      name: 'SUI-USDC',
-      tvl: 3000000,
-      apr: 12.5,
-      riskLevel: 'Low',
-      strategy: 'Optimized position management in the SUI-USDC concentrated liquidity pool, aiming to outperform static LP by ≥3%.',
-      tokens: ['SUI', 'USDC'],
-      description: 'A low-risk vault utilizing the SUI ↔ USDC trading pair with relatively low price volatility and impermanent loss risk.',
-      performance: {
-        day: 0.03,
-        week: 0.25,
-        month: 1.0,
-        allTime: 13.8
-      }
-    }
-  ];
+  // Initialize with memoized data
+  private vaults: Vault[] = createMockVaults();
+  private userInvestments: UserInvestment[] = createMockUserInvestments();
+  private sharedTransactionHistory: TransactionHistory[] = createMockTransactions();
 
-  // Use the shared mockTransactions for consistency between Vault Catalog and Dashboard
-  private sharedTransactionHistory: TransactionHistory[] = mockTransactions;
-
-  // Get all vaults
+  // Get all vaults with caching
   async getVaults(): Promise<Vault[]> {
-    try {
-      // For demonstration purposes:
-      // Return actual vaults (normal operation)
-      return Promise.resolve(this.vaults);
+    // Use cached data if available
+    if (cache.vaults) {
+      return Promise.resolve(cache.vaults);
+    }
 
-      // IMPORTANT: The line below is deliberately placed after a return statement
-      // to ensure it never executes. To test the error UI, move this line ABOVE
-      // the return statement and uncomment it.
-      // throw new Error("API connection error");
+    try {
+      // Simulate API delay - remove in production
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Store in cache for future use
+      cache.vaults = this.vaults;
+      return Promise.resolve(this.vaults);
     } catch (error) {
       console.error("Error fetching vaults:", error);
-      // In a real application, you might want to propagate the error
-      // but for this demo, we'll fall back to returning vaults
       return Promise.resolve(this.vaults);
     }
   }
 
-  // Get a specific vault by ID
+  // Get a specific vault by ID with caching
   async getVaultById(id: string): Promise<Vault | undefined> {
+    // Check if we have cached vaults
+    if (cache.vaults) {
+      return Promise.resolve(cache.vaults.find(v => v.id === id));
+    }
+
+    // Otherwise get from the vaults list
     const vault = this.vaults.find(v => v.id === id);
     return Promise.resolve(vault);
   }
 
-  // Get user investments
+  // Get user investments with caching
   async getUserInvestments(): Promise<UserInvestment[]> {
-    // In a real app, this would filter by the connected user's address
-    return Promise.resolve(mockUserInvestments);
+    if (cache.investments) {
+      return Promise.resolve(cache.investments);
+    }
+
+    // Simulate API delay - remove in production
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    cache.investments = this.userInvestments;
+    return Promise.resolve(this.userInvestments);
   }
 
-  // Get transaction history for a specific vault
+  // Get transaction history with caching
   async getTransactionHistory(vaultId?: string): Promise<TransactionHistory[]> {
+    // Check cache first
+    if (cache.transactions) {
+      if (!vaultId) {
+        return Promise.resolve(cache.transactions);
+      }
+      return Promise.resolve(cache.transactions.filter(tx => tx.vaultId === vaultId));
+    }
+
+    // Simulate API delay - remove in production
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    cache.transactions = this.sharedTransactionHistory;
+
     if (!vaultId) {
       return Promise.resolve(this.sharedTransactionHistory);
     }
@@ -329,6 +275,11 @@ export class VaultService {
 
     // Add to shared transaction history
     this.sharedTransactionHistory.unshift(txHistory);
+
+    // Update cached transactions
+    if (cache.transactions) {
+      cache.transactions.unshift(txHistory);
+    }
 
     // Update TVL
     vault.tvl += amount;
@@ -385,6 +336,11 @@ export class VaultService {
     // Add to shared transaction history
     this.sharedTransactionHistory.unshift(txHistory);
 
+    // Update cached transactions
+    if (cache.transactions) {
+      cache.transactions.unshift(txHistory);
+    }
+
     // Update TVL
     vault.tvl -= amount;
 
@@ -420,8 +376,21 @@ export class VaultService {
     // Add to shared transaction history
     this.sharedTransactionHistory.unshift(txHistory);
 
+    // Update cached transactions
+    if (cache.transactions) {
+      cache.transactions.unshift(txHistory);
+    }
+
     return Promise.resolve(transaction);
+  }
+
+  // Clear cache - useful for testing or when data becomes stale
+  clearCache() {
+    cache.vaults = null;
+    cache.investments = null;
+    cache.transactions = null;
   }
 }
 
+// Create a singleton instance
 export const vaultService = new VaultService();
