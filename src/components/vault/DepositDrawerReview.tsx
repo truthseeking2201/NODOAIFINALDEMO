@@ -1,7 +1,8 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { VaultData } from "@/types/vault";
+import { WalletSignatureDialog } from "@/components/wallet/WalletSignatureDialog";
 
 interface DepositDrawerReviewProps {
   vault: VaultData;
@@ -24,8 +25,10 @@ export function DepositDrawerReview({
   onConfirm,
   onBack
 }: DepositDrawerReviewProps) {
+  const [showWalletDialog, setShowWalletDialog] = useState(false);
   const gasFeeNative = 0.006;
   const gasFeeUsd = 0.02;
+
   const formatUnlockDate = () => {
     const date = new Date();
     date.setDate(date.getDate() + selectedLockup);
@@ -43,6 +46,15 @@ export function DepositDrawerReview({
 
   const formatPercentage = (value?: number) => {
     return value !== undefined ? `${value.toFixed(1)}%` : '-';
+  };
+
+  const handleConfirmClick = () => {
+    setShowWalletDialog(true);
+  };
+
+  const handleWalletSignatureComplete = () => {
+    setShowWalletDialog(false);
+    onConfirm();
   };
 
   return (
@@ -107,7 +119,7 @@ export function DepositDrawerReview({
 
       <div className="flex flex-col space-y-3">
         <Button
-          onClick={onConfirm}
+          onClick={handleConfirmClick}
           disabled={isPending}
           className="w-full h-[52px] rounded-xl font-mono text-sm bg-gradient-to-r from-[#FF8800] to-[#FFA822] hover:shadow-[0_4px_12px_-2px_rgba(255,136,0,0.4)] transition-all duration-300 hover:scale-[0.98]"
         >
@@ -123,6 +135,14 @@ export function DepositDrawerReview({
           Back
         </Button>
       </div>
+
+      <WalletSignatureDialog
+        open={showWalletDialog}
+        onComplete={handleWalletSignatureComplete}
+        transactionType="deposit"
+        amount={amount}
+        vaultName={vault.name}
+      />
     </div>
   );
 }

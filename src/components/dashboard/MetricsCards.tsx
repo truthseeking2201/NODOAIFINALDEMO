@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface MetricsCardsProps {
   totalDeposited: number;
@@ -77,9 +76,9 @@ export function MetricsCards({
         {[...Array(4)].map((_, i) => (
           <Card key={i} className="bg-black/30 border-white/[0.08]">
             <CardContent className="p-6">
-              <Skeleton className="h-5 w-32 mb-4 bg-white/10" />
-              <Skeleton className="h-8 w-24 mb-2 bg-white/10" />
-              <Skeleton className="h-4 w-40 bg-white/10" />
+              <div className="h-5 w-32 mb-4 bg-white/10 rounded animate-pulse"></div>
+              <div className="h-8 w-24 mb-2 bg-white/10 rounded animate-pulse"></div>
+              <div className="h-4 w-40 bg-white/10 rounded animate-pulse"></div>
             </CardContent>
           </Card>
         ))}

@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { useCallback, useEffect, useState } from 'react'
 
 // Simplified wallet types - removed reference to specific crypto wallets
-type WalletType = 'demo';
+type WalletType = 'demo' | 'sui' | 'phantom' | 'martian';
 
 interface WalletState {
   address: string | null
@@ -25,22 +25,41 @@ interface WalletState {
 }
 
 const useWalletStore = create<WalletState>((set) => ({
-  // Set default to connected for demo purposes
-  address: '0x7d783c975da6e3b5ff8259436d4f7da675da6',
-  isConnected: true,
+  // Initial state - not connected by default
+  address: null,
+  isConnected: false,
   isConnecting: false,
   isModalOpen: false,
   isWalletDialogOpen: false,
-  walletType: 'demo',
+  walletType: null,
   balance: {
-    usdc: 1250.45,
-    receiptTokens: 125.2
-  }, // Initialize with demo values
+    usdc: 0,
+    receiptTokens: 0
+  },
   connect: async (walletType) => {
     set({ isConnecting: true })
-    // Connect immediately without delay in demo
+
+    // Simulate connection delay for a more realistic feel
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // Mock wallet addresses for different wallets
+    let mockAddress = "";
+    switch(walletType) {
+      case 'sui':
+        mockAddress = '0x7d783c975da6e3b5ff8259436d4f7da675da6';
+        break;
+      case 'phantom':
+        mockAddress = '0x8e492fd7a3c975da6e3b5ff8259436d4f7d';
+        break;
+      case 'martian':
+        mockAddress = '0x9f723da6e3b5ff8259436d4f7da675dc975d';
+        break;
+      default:
+        mockAddress = '0x7d783c975da6e3b5ff8259436d4f7da675da6';
+    }
+
     set({
-      address: '0x7d783c975da6e3b5ff8259436d4f7da675da6',
+      address: mockAddress,
       isConnected: true,
       isConnecting: false,
       isModalOpen: false,
@@ -101,16 +120,17 @@ export const useWallet = () => {
     vaultName?: string;
   } | null>(null);
 
-  // Always connect in demo mode for demonstration purposes
+  // Check for previously stored connection (on initial load only)
   useEffect(() => {
-    // In demo mode, always ensure wallet is connected
-    if (!isConnected && !isConnecting) {
-      connect('demo')
-
-      // Store connection state
-      localStorage.setItem('wallet-connected', 'true')
+    // We've removed the auto-connect feature
+    // Now we only connect if there's a stored wallet connection
+    const storedConnection = localStorage.getItem('wallet-connected');
+    if (storedConnection === 'true' && !isConnected && !isConnecting) {
+      // Connect with demo wallet on initial load if previously connected
+      // For testing purposes, let's disable the auto-connect for now
+      // connect('demo');
     }
-  }, [connect, isConnected, isConnecting])
+  }, []); // Empty dependency array to run only on mount
 
   // Save connection state to localStorage
   useEffect(() => {

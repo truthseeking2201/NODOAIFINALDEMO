@@ -159,7 +159,8 @@ export const useDepositDrawer = (props?: UseDepositDrawerProps) => {
       handleConfirmDeposit: () => {
         if (!amount || !props?.vault) return;
 
-        // Immediately show success screen with optimistic UI approach
+        // Wallet signature dialog has already been shown
+        // Now we can proceed with the success screen
         setStep('success');
         setShowConfetti(true);
         // No delay in demo mode

@@ -1,7 +1,6 @@
 
 import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { UserInvestment } from '@/types/vault';
 
@@ -12,14 +11,14 @@ interface AssetSplitDonutProps {
 
 export function AssetSplitDonut({ investments, isLoading = false }: AssetSplitDonutProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  
+
   const data = useMemo(() => {
     if (!investments || investments.length === 0) return [];
-    
+
     return investments.map(inv => {
       let color;
       let name;
-      
+
       if (inv.vaultId.includes('deep')) {
         color = '#FF8800';
         name = 'DEEP-SUI';
@@ -30,7 +29,7 @@ export function AssetSplitDonut({ investments, isLoading = false }: AssetSplitDo
         color = '#10B981';
         name = 'SUI-USDC';
       }
-      
+
       return {
         name,
         value: inv.currentValue,
@@ -38,33 +37,33 @@ export function AssetSplitDonut({ investments, isLoading = false }: AssetSplitDo
       };
     });
   }, [investments]);
-  
+
   const totalValue = useMemo(() => {
     return data.reduce((sum, item) => sum + item.value, 0);
   }, [data]);
-  
+
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', { 
-      style: 'currency', 
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     }).format(value);
   };
-  
+
   const handleMouseEnter = (_, index: number) => {
     setActiveIndex(index);
   };
-  
+
   const handleMouseLeave = () => {
     setActiveIndex(null);
   };
-  
+
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       const percentage = ((data.value / totalValue) * 100).toFixed(1);
-      
+
       return (
         <div className="glass-card p-2 shadow-lg">
           <p className="font-medium">{data.name}</p>
@@ -107,7 +106,7 @@ export function AssetSplitDonut({ investments, isLoading = false }: AssetSplitDo
       <CardContent className="p-4 pt-0">
         {isLoading ? (
           <div className="w-full h-[200px] flex items-center justify-center">
-            <Skeleton className="w-[200px] h-[200px] rounded-full" />
+            <div className="w-[200px] h-[200px] rounded-full bg-white/10 animate-pulse" />
           </div>
         ) : data.length > 0 ? (
           <ResponsiveContainer width="100%" height={220}>
@@ -125,9 +124,9 @@ export function AssetSplitDonut({ investments, isLoading = false }: AssetSplitDo
                 isAnimationActive={!window.matchMedia('(prefers-reduced-motion: reduce)').matches}
               >
                 {data.map((entry, index) => (
-                  <Cell 
-                    key={`cell-${index}`} 
-                    fill={entry.color} 
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={entry.color}
                     strokeWidth={index === activeIndex ? 2 : 0}
                     stroke="#fff"
                   />

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { AppHeader } from "./AppHeader";
 import { AppFooter } from "./AppFooter";
 import { NeuralNetworkBackground } from "@/components/vault/NeuralNetworkBackground";
-import { AIAssistantButton } from "@/components/ai/AIAssistantButton";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface MainLayoutProps {
@@ -110,9 +109,6 @@ export function MainLayout({ children }: MainLayoutProps) {
             {children}
           </div>
           <AppFooter />
-
-          {/* AI Assistant Button - globally accessible */}
-          <AIAssistantButton />
         </motion.div>
       </AnimatePresence>
     </div>

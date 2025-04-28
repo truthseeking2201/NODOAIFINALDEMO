@@ -12,7 +12,6 @@ import {
 } from 'recharts';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { TransactionHistory } from '@/types/vault';
 
 interface ChartData {
@@ -29,11 +28,11 @@ interface PerformanceChartProps {
   onTxClick?: (tx: TransactionHistory) => void;
 }
 
-export function PerformanceChart({ 
-  data, 
-  transactions = [], 
+export function PerformanceChart({
+  data,
+  transactions = [],
   isLoading = false,
-  onTxClick 
+  onTxClick
 }: PerformanceChartProps) {
   const [viewMode, setViewMode] = useState<'value' | 'profit'>('value');
 
@@ -53,7 +52,7 @@ export function PerformanceChart({
 
   const enhancedData = useMemo(() => {
     if (!data || data.length === 0) return [];
-    
+
     // If we don't have initial profit values, calculate them
     if (data[0] && !data[0].profit) {
       let initialValue = data[0].value;
@@ -72,22 +71,22 @@ export function PerformanceChart({
     const values = enhancedData.map(d => viewMode === 'value' ? d.value : (d.profit || 0));
     const min = Math.min(...values) * 0.95;
     const max = Math.max(...values) * 1.05;
-    
+
     return [min, max];
   }, [enhancedData, viewMode]);
 
   // Find transactions to display as reference dots
   const transactionDots = useMemo(() => {
-    if (!transactions || transactions.length === 0 || !enhancedData || enhancedData.length === 0) 
+    if (!transactions || transactions.length === 0 || !enhancedData || enhancedData.length === 0)
       return [];
 
     return transactions.map(tx => {
       // Find the chart point that corresponds to this transaction date
       const txDate = tx.timestamp.split('T')[0];
       const chartPoint = enhancedData.find(d => d.date === txDate);
-      
+
       if (!chartPoint) return null;
-      
+
       return {
         ...tx,
         x: txDate,
@@ -119,7 +118,7 @@ export function PerformanceChart({
 
   const CustomDot = (props: any) => {
     const { cx, cy, stroke, payload, index } = props;
-    
+
     // Show special marker for deposit points
     if (payload.deposit) {
       return (
@@ -129,7 +128,7 @@ export function PerformanceChart({
         </svg>
       );
     }
-    
+
     // Don't show regular dots
     return null;
   };
@@ -162,7 +161,7 @@ export function PerformanceChart({
           </svg>
           Portfolio Performance
         </CardTitle>
-        
+
         <div className="flex p-1 bg-white/5 rounded-full">
           <Button
             variant="ghost"
@@ -186,7 +185,7 @@ export function PerformanceChart({
       <CardContent className="p-0 h-[250px]">
         {isLoading ? (
           <div className="w-full h-full flex items-center justify-center">
-            <Skeleton className="w-full h-[200px] mt-4" />
+            <div className="w-full h-[200px] mt-4 bg-white/10 animate-pulse rounded"></div>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
@@ -224,7 +223,7 @@ export function PerformanceChart({
                 animationDuration={700}
                 animationEasing="ease-out"
               />
-              
+
               {/* Transaction markers */}
               {transactionDots.map((dot, index) => (
                 <ReferenceDot

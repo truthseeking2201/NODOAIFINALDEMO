@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 
 interface KpiBarProps {
   portfolioValue: number;
@@ -24,7 +23,7 @@ export function KpiBar({ portfolioValue, profit, averageAPR, isLoading = false }
       const scrollPosition = window.scrollY;
       setIsSticky(scrollPosition > 100);
     };
-    
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -32,22 +31,22 @@ export function KpiBar({ portfolioValue, profit, averageAPR, isLoading = false }
   // Animate values
   useEffect(() => {
     if (isLoading) return;
-    
+
     const duration = 600; // ms
     const startTime = performance.now();
-    
+
     const animateCount = (timestamp: number) => {
       const elapsed = timestamp - startTime;
       const progress = Math.min(elapsed / duration, 1);
       // Easing function for smooth animation
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      
+
       setDisplayValue({
         portfolio: Math.floor(easeOutQuart * portfolioValue),
         profit: Math.floor(easeOutQuart * profit),
         apr: easeOutQuart * averageAPR
       });
-      
+
       if (progress < 1) {
         requestAnimationFrame(animateCount);
       } else {
@@ -58,13 +57,13 @@ export function KpiBar({ portfolioValue, profit, averageAPR, isLoading = false }
         });
       }
     };
-    
+
     requestAnimationFrame(animateCount);
   }, [portfolioValue, profit, averageAPR, isLoading]);
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', { 
-      style: 'currency', 
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
@@ -78,9 +77,9 @@ export function KpiBar({ portfolioValue, profit, averageAPR, isLoading = false }
         <div className="relative flex flex-wrap md:flex-nowrap justify-between items-center p-4 z-10">
           {isLoading ? (
             <>
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-8 w-24" />
-              <Skeleton className="h-8 w-32" />
+              <div className="h-8 w-48 bg-white/10 animate-pulse rounded"></div>
+              <div className="h-8 w-24 bg-white/10 animate-pulse rounded"></div>
+              <div className="h-8 w-32 bg-white/10 animate-pulse rounded"></div>
             </>
           ) : (
             <>
@@ -92,14 +91,14 @@ export function KpiBar({ portfolioValue, profit, averageAPR, isLoading = false }
                   ({profit >= 0 ? '+' : ''}{((profit / (portfolioValue - profit)) * 100).toFixed(1)}%)
                 </span>
               </div>
-              
+
               <div className="flex items-baseline">
                 <h3 className={`text-xl font-mono font-medium mr-2 ${profit >= 0 ? 'text-emerald' : 'text-red-500'}`}>
                   {profit >= 0 ? '+' : ''}{formatCurrency(displayValue.profit)}
                 </h3>
                 <span className="text-sm text-white/60">profit</span>
               </div>
-              
+
               <div className="flex items-baseline">
                 <h3 className="text-xl font-mono font-medium mr-2">
                   {displayValue.apr.toFixed(1)}%
