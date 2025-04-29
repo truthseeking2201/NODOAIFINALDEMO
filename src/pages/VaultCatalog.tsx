@@ -227,12 +227,7 @@ export default function VaultCatalog() {
           transition={{ duration: 0.5 }}
         >
           <div className="max-w-screen-xl mx-auto">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-white">
-                <span className="gradient-text-amber">NODOAIx</span> Tokens
-              </h2>
-              <p className="text-white/70 mt-2">Intelligent yield optimization receipts with exclusive benefits</p>
-            </div>
+            {/* Removed duplicate title section */}
             <Suspense fallback={null}>
               <NODOAIxPromoBanner />
             </Suspense>
