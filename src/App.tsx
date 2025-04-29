@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { lazy, Suspense } from 'react';
-import ErrorBoundary from "@/components/error/ErrorBoundary";
 
 // Lazy load pages for better performance with improved loading reliability
 const VaultCatalog = lazy(() => import("./pages/VaultCatalog").catch(e => {
@@ -24,10 +23,6 @@ const Dashboard = lazy(() =>
       return { default: () => <PageFallback /> };
     })
 );
-const ActivityDemo = lazy(() => import("./pages/ActivityDemo").catch(e => {
-  console.error("Error loading ActivityDemo:", e);
-  return { default: () => <PageFallback /> };
-}));
 const NotFound = lazy(() => import("./pages/NotFound").catch(e => {
   console.error("Error loading NotFound:", e);
   return { default: () => <PageFallback /> };
@@ -40,9 +35,7 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: false,
       retry: false, // Disable retries
       staleTime: 60000, // Cache for 1 minute
-      cacheTime: 120000, // Keep in cache for 2 minutes
-      suspense: false, // Don't use suspense for data fetching
-      useErrorBoundary: false, // Don't use error boundaries
+      gcTime: 120000, // Keep in cache for 2 minutes
     },
   },
 });
@@ -62,67 +55,46 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <ErrorBoundary>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={
-              <MainLayout>
-                <ErrorBoundary>
-                  <Suspense fallback={<PageFallback />}>
-                    <VaultCatalog />
-                  </Suspense>
-                </ErrorBoundary>
-              </MainLayout>
-            } />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={
+            <MainLayout>
+              <Suspense fallback={<PageFallback />}>
+                <VaultCatalog />
+              </Suspense>
+            </MainLayout>
+          } />
 
-            {/* Routes for backward compatibility with old URLs */}
-            <Route path="/vaults/orion-stable" element={<Navigate to="/vaults/cetus-sui" replace />} />
-            <Route path="/vaults/nova-yield" element={<Navigate to="/vaults/deep-sui" replace />} />
-            <Route path="/vaults/emerald-growth" element={<Navigate to="/vaults/sui-usdc" replace />} />
+          {/* Routes for backward compatibility with old URLs */}
+          <Route path="/vaults/orion-stable" element={<Navigate to="/vaults/cetus-sui" replace />} />
+          <Route path="/vaults/nova-yield" element={<Navigate to="/vaults/deep-sui" replace />} />
+          <Route path="/vaults/emerald-growth" element={<Navigate to="/vaults/sui-usdc" replace />} />
 
-            {/* Regular vault detail route */}
-            <Route path="/vaults/:vaultId" element={
-              <MainLayout>
-                <ErrorBoundary>
-                  <Suspense fallback={<PageFallback />}>
-                    <VaultDetail />
-                  </Suspense>
-                </ErrorBoundary>
-              </MainLayout>
-            } />
+          {/* Regular vault detail route */}
+          <Route path="/vaults/:vaultId" element={
+            <MainLayout>
+              <Suspense fallback={<PageFallback />}>
+                <VaultDetail />
+              </Suspense>
+            </MainLayout>
+          } />
 
-            {/* Dashboard route with dedicated Suspense */}
-            <Route path="/dashboard" element={
-              <MainLayout>
-                <ErrorBoundary>
-                  <Suspense fallback={<PageFallback />}>
-                    <Dashboard />
-                  </Suspense>
-                </ErrorBoundary>
-              </MainLayout>
-            } />
+          {/* Dashboard route with dedicated Suspense */}
+          <Route path="/dashboard" element={
+            <MainLayout>
+              <Suspense fallback={<PageFallback />}>
+                <Dashboard />
+              </Suspense>
+            </MainLayout>
+          } />
 
-            {/* Activity Demo route */}
-            <Route path="/activity" element={
-              <MainLayout>
-                <ErrorBoundary>
-                  <Suspense fallback={<PageFallback />}>
-                    <ActivityDemo />
-                  </Suspense>
-                </ErrorBoundary>
-              </MainLayout>
-            } />
-
-            <Route path="*" element={
-              <ErrorBoundary>
-                <Suspense fallback={<PageFallback />}>
-                  <NotFound />
-                </Suspense>
-              </ErrorBoundary>
-            } />
-          </Routes>
-        </BrowserRouter>
-      </ErrorBoundary>
+          <Route path="*" element={
+            <Suspense fallback={<PageFallback />}>
+              <NotFound />
+            </Suspense>
+          } />
+        </Routes>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );

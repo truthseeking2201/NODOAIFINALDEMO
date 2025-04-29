@@ -24,7 +24,6 @@ export default defineConfig(({ mode }) => ({
   },
   esbuild: {
     jsx: 'automatic',
-    jsxInject: `import React from 'react'`
   },
   // Disable minification for development/debugging
   build: {
