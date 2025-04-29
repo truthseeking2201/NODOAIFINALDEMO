@@ -18,7 +18,6 @@ import { NeuralNetworkBackground } from "@/components/vault/NeuralNetworkBackgro
 import { AITransactionTicker } from "@/components/vault/AITransactionTicker";
 import { AIStrategyVisualizer } from "@/components/vault/AIStrategyVisualizer";
 import { AIQueryAssistant } from "@/components/vault/AIQueryAssistant";
-import { AIActivityNotification } from "@/components/vault/AIActivityNotification";
 import { AIConfidenceScore } from "@/components/vault/AIConfidenceScore";
 import { NeuroProcessingVisualizer } from "@/components/vault/NeuroProcessingVisualizer";
 import { AIControlPanel } from "@/components/vault/AIControlPanel";
@@ -68,8 +67,7 @@ export default function VaultDetail() {
   const [activeTab, setActiveTab] = useState("strategy");
   const [customVaultData, setCustomVaultData] = useState<VaultData | null>(null);
   const [wasManuallyClosedRef, setWasManuallyClosedRef] = useState(false);
-  const [aiInsight, setAiInsight] = useState<string | null>(null);
-  const [showAiInsight, setShowAiInsight] = useState(false);
+  const [showAiInsights, setShowAiInsights] = useState(false);
   const [aiConfidenceScore, setAiConfidenceScore] = useState<number>(92);
   const [neuroProcessingScore, setNeuroProcessingScore] = useState<number>(87);
   const [optimizationEvents, setOptimizationEvents] = useState<string[]>([
@@ -154,13 +152,6 @@ export default function VaultDetail() {
       if (Math.random() > 0.7) {
         const newEvent = generateOptimizationEvent();
         setOptimizationEvents(prev => [newEvent, ...prev.slice(0, 4)]);
-        setAiInsight(newEvent);
-        setShowAiInsight(true);
-
-        // Hide after a few seconds
-        setTimeout(() => {
-          setShowAiInsight(false);
-        }, 5000);
       }
     }, 10000);
 
@@ -181,16 +172,7 @@ export default function VaultDetail() {
     return events[Math.floor(Math.random() * events.length)];
   };
 
-  // Handle AI insights from the visualizer
-  const handleOptimizationEvent = (event: string) => {
-    setAiInsight(event);
-    setShowAiInsight(true);
 
-    // Hide after a few seconds
-    setTimeout(() => {
-      setShowAiInsight(false);
-    }, 5000);
-  };
 
   useEffect(() => {
     if (isConnected && hasInteracted && !isDepositDrawerOpen && !wasManuallyClosedRef) {
@@ -331,42 +313,7 @@ export default function VaultDetail() {
           />
         </div>
 
-        {/* AI Insight notification */}
-        <AnimatePresence>
-          {showAiInsight && aiInsight && (
-            <motion.div
-              className="fixed top-20 right-6 z-50 max-w-sm"
-              initial={{ opacity: 0, y: -20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className={`p-4 rounded-xl shadow-lg backdrop-blur-md border ${
-                vault.type === 'nova' ? 'bg-nova/10 border-nova/30' :
-                vault.type === 'orion' ? 'bg-orion/10 border-orion/30' :
-                'bg-emerald/10 border-emerald/30'
-              }`}>
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${
-                    vault.type === 'nova' ? 'bg-gradient-to-br from-nova/20 to-transparent' :
-                    vault.type === 'orion' ? 'bg-gradient-to-br from-orion/20 to-transparent' :
-                    'bg-gradient-to-br from-emerald/20 to-transparent'
-                  }`}>
-                    <Brain size={18} className={
-                      vault.type === 'nova' ? 'text-nova' :
-                      vault.type === 'orion' ? 'text-orion' :
-                      'text-emerald'
-                    } />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-white">AI Insight</h4>
-                    <p className="text-xs text-white/80 mt-0.5">{aiInsight}</p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+
 
         {/* VaultDetail Header with enhanced styling */}
         <motion.section
@@ -377,32 +324,48 @@ export default function VaultDetail() {
           transition={{ duration: 0.8 }}
         >
           <VaultDetailHeader vaultName={vault.name} styles={styles} />
+
+          {/* Show AI Insights Filter */}
+          <div className="px-4 mb-2 flex justify-end">
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-white/60">Show AI Insights</span>
+              <button
+                className={`w-10 h-5 rounded-full relative focus:outline-none ${showAiInsights ? 'bg-green-500' : 'bg-gray-600'}`}
+                onClick={() => setShowAiInsights(!showAiInsights)}
+              >
+                <span
+                  className={`absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-white transition-transform duration-200 ${showAiInsights ? 'transform translate-x-5' : ''}`}
+                />
+              </button>
+            </div>
+          </div>
         </motion.section>
 
         {/* Neural Activity Ticker Bar */}
-        <motion.div
-          className="px-4 mb-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-        >
-          <div className={`w-full h-12 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10 flex items-center px-4 overflow-hidden`}>
-            <div className="flex items-center gap-2">
-              <div className={`p-1.5 rounded-lg ${
-                vault.type === 'nova' ? 'bg-nova/10' :
-                vault.type === 'orion' ? 'bg-orion/10' :
-                'bg-emerald/10'
-              }`}>
-                <Network size={14} className={
-                  vault.type === 'nova' ? 'text-nova' :
-                  vault.type === 'orion' ? 'text-orion' :
-                  'text-emerald'
-                } />
+        {showAiInsights && (
+          <motion.div
+            className="px-4 mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+          >
+            <div className={`w-full h-12 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10 flex items-center px-4 overflow-hidden`}>
+              <div className="flex items-center gap-2">
+                <div className={`p-1.5 rounded-lg ${
+                  vault.type === 'nova' ? 'bg-nova/10' :
+                  vault.type === 'orion' ? 'bg-orion/10' :
+                  'bg-emerald/10'
+                }`}>
+                  <Network size={14} className={
+                    vault.type === 'nova' ? 'text-nova' :
+                    vault.type === 'orion' ? 'text-orion' :
+                    'text-emerald'
+                  } />
+                </div>
+                <div className="text-sm font-medium text-white">
+                  AI Working For You:
+                </div>
               </div>
-              <div className="text-sm font-medium text-white">
-                AI Working For You:
-              </div>
-            </div>
 
             <div className="flex-1 overflow-hidden relative ml-3">
               <motion.div
@@ -467,6 +430,7 @@ export default function VaultDetail() {
             </div>
           </div>
         </motion.div>
+        )}
 
         {/* Main Content Layout with animation */}
         <motion.div
@@ -706,26 +670,27 @@ export default function VaultDetail() {
               </div>
 
               {/* AI Health Monitor */}
-              <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2 rounded-lg ${
-                    vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
-                    vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
-                    'bg-gradient-to-br from-emerald/30 to-emerald/10'
-                  }`}>
-                    <Brain size={20} className={
-                      vault.type === 'nova' ? 'text-nova' :
-                      vault.type === 'orion' ? 'text-orion' :
-                      'text-emerald'
-                    } />
+              {showAiInsights && (
+                <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`p-2 rounded-lg ${
+                      vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
+                      vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
+                      'bg-gradient-to-br from-emerald/30 to-emerald/10'
+                    }`}>
+                      <Brain size={20} className={
+                        vault.type === 'nova' ? 'text-nova' :
+                        vault.type === 'orion' ? 'text-orion' :
+                        'text-emerald'
+                      } />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">AI Health Monitor</h3>
+                      <p className="text-sm text-white/60">
+                        How AI is working for you
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">AI Health Monitor</h3>
-                    <p className="text-sm text-white/60">
-                      How AI is working for you
-                    </p>
-                  </div>
-                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div className={`bg-black/30 rounded-xl border ${
                     vault.type === 'nova' ? 'border-nova/20' :
@@ -812,28 +777,30 @@ export default function VaultDetail() {
                   </div>
                 </div>
               </div>
+              )}
 
               {/* AI Strategy Card - Simplified */}
-              <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2 rounded-lg ${
-                    vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
-                    vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
-                    'bg-gradient-to-br from-emerald/30 to-emerald/10'
-                  }`}>
-                    <Lightbulb size={20} className={
-                      vault.type === 'nova' ? 'text-nova' :
-                      vault.type === 'orion' ? 'text-orion' :
-                      'text-emerald'
-                    } />
+              {showAiInsights && (
+                <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`p-2 rounded-lg ${
+                      vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
+                      vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
+                      'bg-gradient-to-br from-emerald/30 to-emerald/10'
+                    }`}>
+                      <Lightbulb size={20} className={
+                        vault.type === 'nova' ? 'text-nova' :
+                        vault.type === 'orion' ? 'text-orion' :
+                        'text-emerald'
+                      } />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">How AI Makes Money</h3>
+                      <p className="text-sm text-white/60">
+                        Simple explanation of AI strategy
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">How AI Makes Money</h3>
-                    <p className="text-sm text-white/60">
-                      Simple explanation of AI strategy
-                    </p>
-                  </div>
-                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div className="bg-white/5 p-4 rounded-xl border border-white/10">
@@ -894,30 +861,33 @@ export default function VaultDetail() {
                   </p>
                 </div>
               </div>
+              )}
 
               {/* AI Transaction Activity - Simplified */}
-              <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2 rounded-lg ${
-                    vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
-                    vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
-                    'bg-gradient-to-br from-emerald/30 to-emerald/10'
-                  }`}>
-                    <BarChart size={20} className={
-                      vault.type === 'nova' ? 'text-nova' :
-                      vault.type === 'orion' ? 'text-orion' :
-                      'text-emerald'
-                    } />
+              {showAiInsights && (
+                <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`p-2 rounded-lg ${
+                      vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
+                      vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
+                      'bg-gradient-to-br from-emerald/30 to-emerald/10'
+                    }`}>
+                      <BarChart size={20} className={
+                        vault.type === 'nova' ? 'text-nova' :
+                        vault.type === 'orion' ? 'text-orion' :
+                        'text-emerald'
+                      } />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">AI Activity Stream</h3>
+                      <p className="text-sm text-white/60">
+                        See AI working for you in real time
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">AI Activity Stream</h3>
-                    <p className="text-sm text-white/60">
-                      See AI working for you in real time
-                    </p>
-                  </div>
+                  <AITransactionTicker vaultType={vault.type} />
                 </div>
-                <AITransactionTicker vaultType={vault.type} />
-              </div>
+              )}
 
               {/* Security Information - Simplified */}
               <Card className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative">
@@ -1007,11 +977,6 @@ export default function VaultDetail() {
           </div>
         </motion.div>
       </div>
-
-      {/* Add AI Activity Notifications */}
-      <AIActivityNotification
-        vaultType={vault.type}
-      />
 
       {/* Add AI Assistant chat bot */}
       <AIQueryAssistant
