@@ -163,7 +163,7 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
     queryFn: () => vaultService.getTransactionHistory(),
     refetchOnWindowFocus: false,
     staleTime: 30000, // 30 seconds
-    cacheTime: 300000, // 5 minutes
+    gcTime: 300000, // 5 minutes
   });
 
   // Generate simulated activities

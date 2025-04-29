@@ -13,10 +13,9 @@ export function useVaultDetail(vaultId: string) {
     queryKey: ['vault', vaultId],
     queryFn: () => vaultService.getVaultById(vaultId),
     enabled: !!vaultId,
-    suspense: false,
     refetchOnMount: true, // Always refetch when component mounts
     staleTime: 60000, // Cache for 1 minute
-    cacheTime: 120000, // Keep in cache for 2 minutes
+    gcTime: 120000, // Keep in cache for 2 minutes
   });
 
   // Convert Vault to VaultData if available
