@@ -70,6 +70,67 @@ export function EnhancedPerformanceChart({
     "High correlation with market trend patterns from Q2 2023"
   ]);
 
+  // Generate new AI insights based on the current data
+  useEffect(() => {
+    if (chartData.length > 0) {
+      // Generate insights dynamically based on the current data
+      const actualData = chartData.filter(point => !point.prediction);
+      if (actualData.length < 2) return;
+
+      const latest = actualData[actualData.length - 1];
+      const earliest = actualData[0];
+      const changePercent = ((latest.aiValue - earliest.aiValue) / earliest.aiValue) * 100;
+      const marketChangePercent = ((latest.marketValue - earliest.marketValue) / earliest.marketValue) * 100;
+      const outperformMarket = changePercent > marketChangePercent;
+
+      // Generate insights based on the data
+      const newInsights = [];
+
+      if (outperformMarket) {
+        newInsights.push(`AI strategy outperforming market by ${(changePercent - marketChangePercent).toFixed(2)}% in this period`);
+      }
+
+      // Check recent trend (last 5 points)
+      const recentData = actualData.slice(-5);
+      const recentTrend = recentData[recentData.length - 1].aiValue > recentData[0].aiValue;
+
+      if (recentTrend) {
+        newInsights.push("Recent upward trend detected - optimizing position allocations");
+      } else {
+        newInsights.push("Recent consolidation period - maintaining defensive positions");
+      }
+
+      // Generate a risk assessment
+      const riskLevel = vaultType === 'nova' ? 'moderate-high' : vaultType === 'orion' ? 'moderate' : 'low';
+      newInsights.push(`Current market risk assessment: ${riskLevel} - adjusting strategy accordingly`);
+
+      // Add a randomized insight based on vault type
+      const vaultSpecificInsights = {
+        'nova': [
+          "Aggressively rebalancing to capture emerging opportunities",
+          "Optimizing for maximum growth with balanced risk exposure",
+          "Neural predictive models suggest potential breakout in coming period"
+        ],
+        'orion': [
+          "Balanced approach maintaining optimal risk/reward ratio",
+          "Strategic diversification providing increased stability",
+          "AI has detected favorable market conditions for moderate growth"
+        ],
+        'emerald': [
+          "Conservative positioning with focus on capital preservation",
+          "Optimized for stable returns with minimized volatility",
+          "Risk mitigation strategies actively deployed by AI systems"
+        ]
+      };
+
+      const typeInsights = vaultSpecificInsights[vaultType];
+      const randomTypeInsight = typeInsights[Math.floor(Math.random() * typeInsights.length)];
+      newInsights.push(randomTypeInsight);
+
+      setAiInsights(newInsights);
+    }
+  }, [chartData, vaultType]);
+
   const getTypeColor = () => {
     switch (vaultType) {
       case 'nova': return {
@@ -297,6 +358,14 @@ export function EnhancedPerformanceChart({
     return value >= 0 ? `+${value.toFixed(2)}%` : `${value.toFixed(2)}%`;
   };
 
+  // Helper function to dispatch AI insight events
+  const dispatchAIInsightEvent = (message: string) => {
+    const event = new CustomEvent('ai-insight', {
+      detail: { message }
+    });
+    window.dispatchEvent(event);
+  };
+
   // Get statistical data
   const getCurrentStats = () => {
     // Filter out prediction points
@@ -493,20 +562,16 @@ export function EnhancedPerformanceChart({
               : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
           }`}
           onClick={() => {
+            // Toggle AI Optimization visibility
             setShowAIActivity(!showAIActivity);
-            // Display results on chart
             const newState = !showAIActivity;
-            console.log(`AI Optimization ${newState ? 'enabled' : 'disabled'}`);
 
-            // Trigger chart update - this happens automatically due to React state change
+            // Provide feedback to user
+            const message = newState
+              ? "AI Optimization data now visible on chart"
+              : "AI Optimization data hidden";
 
-            // Show feedback notification
-            if (newState) {
-              const event = new CustomEvent('ai-insight', {
-                detail: { message: "AI Optimization data now visible on chart" }
-              });
-              window.dispatchEvent(event);
-            }
+            dispatchAIInsightEvent(message);
           }}
           data-control="ai-optimization"
         >
@@ -521,18 +586,16 @@ export function EnhancedPerformanceChart({
               : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
           }`}
           onClick={() => {
+            // Toggle Market Comparison visibility
             setShowMarketComparison(!showMarketComparison);
-            // Display results on chart
             const newState = !showMarketComparison;
-            console.log(`Market Comparison ${newState ? 'enabled' : 'disabled'}`);
 
-            // Show feedback notification
-            if (newState) {
-              const event = new CustomEvent('ai-insight', {
-                detail: { message: "Market Comparison data now visible on chart" }
-              });
-              window.dispatchEvent(event);
-            }
+            // Provide feedback to user
+            const message = newState
+              ? "Market Comparison data now visible on chart"
+              : "Market Comparison data hidden";
+
+            dispatchAIInsightEvent(message);
           }}
           data-control="market-comparison"
         >
@@ -547,18 +610,16 @@ export function EnhancedPerformanceChart({
               : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
           }`}
           onClick={() => {
+            // Toggle Prediction visibility
             setShowPrediction(!showPrediction);
-            // Display results on chart
             const newState = !showPrediction;
-            console.log(`Prediction ${newState ? 'enabled' : 'disabled'}`);
 
-            // Show feedback notification
-            if (newState) {
-              const event = new CustomEvent('ai-insight', {
-                detail: { message: "AI Prediction data now visible on chart" }
-              });
-              window.dispatchEvent(event);
-            }
+            // Provide feedback to user
+            const message = newState
+              ? "AI Prediction data now visible on chart"
+              : "AI Prediction data hidden";
+
+            dispatchAIInsightEvent(message);
           }}
           data-control="prediction"
         >
@@ -573,18 +634,16 @@ export function EnhancedPerformanceChart({
               : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
           }`}
           onClick={() => {
+            // Toggle Volume visibility
             setShowVolume(!showVolume);
-            // Display results on chart
             const newState = !showVolume;
-            console.log(`Volume ${newState ? 'enabled' : 'disabled'}`);
 
-            // Show feedback notification
-            if (newState) {
-              const event = new CustomEvent('ai-insight', {
-                detail: { message: "Trading Volume data now visible on chart" }
-              });
-              window.dispatchEvent(event);
-            }
+            // Provide feedback to user
+            const message = newState
+              ? "Trading Volume data now visible on chart"
+              : "Trading Volume data hidden";
+
+            dispatchAIInsightEvent(message);
           }}
           data-control="volume"
         >
@@ -596,7 +655,19 @@ export function EnhancedPerformanceChart({
           className={`ml-auto text-xs px-2 py-1 rounded-md flex items-center gap-1.5 transition-colors
             ${showAdvancedPanel ? 'bg-white/20 text-white' : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'}
           `}
-          onClick={() => setShowAdvancedPanel(!showAdvancedPanel)}
+          onClick={() => {
+            // Toggle AI Insights panel
+            setShowAdvancedPanel(!showAdvancedPanel);
+            const newState = !showAdvancedPanel;
+
+            // Provide feedback to user
+            const message = newState
+              ? "AI Insights panel opened"
+              : "AI Insights panel closed";
+
+            dispatchAIInsightEvent(message);
+          }}
+          data-control="show-ai-insights"
         >
           {showAdvancedPanel ? 'Hide AI Insights' : 'Show AI Insights'}
           <ChevronDown
@@ -667,6 +738,19 @@ export function EnhancedPerformanceChart({
               tickFormatter={(value) => `$${value}`}
               width={45}
             />
+            {/* Add secondary Y-axis for volume data */}
+            {showVolume && (
+              <YAxis
+                yAxisId="volume"
+                orientation="right"
+                domain={['dataMin', 'dataMax + 100']}
+                tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 10 }}
+                axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                tickLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                tickFormatter={(value) => `${value}`}
+                width={40}
+              />
+            )}
             <Tooltip content={<CustomTooltip />} />
 
             {/* Draw a vertical line separating actual and predicted data */}
@@ -722,7 +806,7 @@ export function EnhancedPerformanceChart({
                 dataKey="volume"
                 barSize={20}
                 fill={colors.chart.volume}
-                yAxisId={1}
+                yAxisId="volume"
                 opacity={0.6}
               />
             )}

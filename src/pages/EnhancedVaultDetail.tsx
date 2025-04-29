@@ -524,23 +524,23 @@ export default function VaultDetail() {
                     <div className="space-y-4">
                       {/* Easy to understand APR section */}
                       <div className="bg-white/10 rounded-xl p-4 border border-white/20">
-                        <div className="text-sm text-white/60 mb-1">Lợi nhuận hiện tại</div>
+                        <div className="text-sm text-white/60 mb-1">Current Profit</div>
                         <div className="flex items-baseline gap-2">
                           <div className="text-3xl font-bold text-white">{vault.apr}%</div>
                           <div className="text-lg text-white/60">APR</div>
                         </div>
                         <div className="text-xs text-white/60 mt-1">
-                          Bạn kiếm được chừng này mỗi năm trên số tiền gửi
+                          You earn this much annually on your deposit
                         </div>
                       </div>
 
                       {/* Simplified investment calculator */}
                       <div className="bg-white/10 rounded-xl p-4 border border-white/20">
-                        <div className="text-sm font-medium text-white mb-2">Bạn có thể kiếm được bao nhiêu?</div>
+                        <div className="text-sm font-medium text-white mb-2">How much can you earn?</div>
                         <div className="space-y-3">
                           <div>
                             <div className="flex justify-between mb-1">
-                              <div className="text-xs text-white/60">Số tiền đầu tư</div>
+                              <div className="text-xs text-white/60">Investment Amount</div>
                               <div className="text-xs font-medium">${projectedAmount}</div>
                             </div>
                             {/* Simplified slider */}
@@ -561,7 +561,7 @@ export default function VaultDetail() {
 
                           {/* Monthly earnings */}
                           <div className="bg-black/30 rounded-lg p-3 flex justify-between items-center">
-                            <div className="text-sm text-white">Thu nhập hàng tháng</div>
+                            <div className="text-sm text-white">Monthly Income</div>
                             <div className="text-lg font-bold font-mono" style={{ color: colors.primary }}>
                               ${((Number(projectedAmount) * vault.apr / 100) / 12).toFixed(2)}
                             </div>
@@ -569,7 +569,7 @@ export default function VaultDetail() {
 
                           {/* Yearly earnings */}
                           <div className="bg-black/30 rounded-lg p-3 flex justify-between items-center">
-                            <div className="text-sm text-white">Thu nhập hàng năm</div>
+                            <div className="text-sm text-white">Annual Income</div>
                             <div className="text-lg font-bold font-mono" style={{ color: colors.primary }}>
                               ${(Number(projectedAmount) * vault.apr / 100).toFixed(2)}
                             </div>
@@ -593,7 +593,7 @@ export default function VaultDetail() {
                           borderColor: vault.type === 'nova' ? '#f97316' : vault.type === 'orion' ? '#f59e0b' : '#10b981'
                         }}></div>
                         <div className="relative flex items-center justify-center gap-2">
-                          {isConnected ? "Gửi tiền ngay" : "Kết nối ví"}
+                          {isConnected ? "Deposit Now" : "Connect Wallet"}
                           <ArrowUpRight size={20} />
                         </div>
                       </button>
@@ -601,7 +601,7 @@ export default function VaultDetail() {
                       {/* Simplified risk indicator */}
                       <div className="flex items-center gap-2 text-white/60 text-xs justify-center">
                         <Shield size={14} className="text-white/60" />
-                        <span>Rủi ro: {vault.riskLevel === 'low' ? 'Thấp' : vault.riskLevel === 'medium' ? 'Trung bình' : 'Cao'} · Mở khóa sau {Math.ceil((unlockTime.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} ngày</span>
+                        <span>Risk: {vault.riskLevel === 'low' ? 'Low' : vault.riskLevel === 'medium' ? 'Medium' : 'High'} · Unlock after {Math.ceil((unlockTime.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days</span>
                       </div>
                     </div>
                   </div>
@@ -622,8 +622,8 @@ export default function VaultDetail() {
                         <span className="text-sm font-bold text-white">AIx</span>
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-white">Phần thưởng NODOAIx</h3>
-                        <p className="text-xs text-white/60">Kiếm thêm trong khi tiền tăng trưởng</p>
+                        <h3 className="text-lg font-bold text-white">NODOAIx Rewards</h3>
+                        <p className="text-xs text-white/60">Earn more while your money grows</p>
                       </div>
                     </div>
 
@@ -634,25 +634,25 @@ export default function VaultDetail() {
                           {Math.floor(Number(projectedAmount) * 0.8)} AIx
                         </div>
                         <div className="text-sm text-white/60">
-                          Token bạn sẽ nhận được khi gửi tiền
+                          Tokens you will receive when you deposit
                         </div>
                       </div>
 
                       {/* Benefits list */}
                       <div className="bg-white/5 p-4 rounded-xl border border-white/10">
-                        <h4 className="text-sm font-medium text-white mb-2">Với token này bạn có thể:</h4>
+                        <h4 className="text-sm font-medium text-white mb-2">With these tokens you can:</h4>
                         <div className="space-y-2">
                           <div className="flex items-start gap-2">
                             <div className="mt-1 text-amber-500">•</div>
-                            <div className="text-xs text-white/80">Nhận thêm tới +2.5% lợi nhuận</div>
+                            <div className="text-xs text-white/80">Get up to +2.5% additional profit</div>
                           </div>
                           <div className="flex items-start gap-2">
                             <div className="mt-1 text-amber-500">•</div>
-                            <div className="text-xs text-white/80">Bỏ phiếu cho tính năng platform tương lai</div>
+                            <div className="text-xs text-white/80">Vote for future platform features</div>
                           </div>
                           <div className="flex items-start gap-2">
                             <div className="mt-1 text-amber-500">•</div>
-                            <div className="text-xs text-white/80">Truy cập công cụ AI cao cấp</div>
+                            <div className="text-xs text-white/80">Access premium AI tools</div>
                           </div>
                         </div>
                       </div>
@@ -660,12 +660,12 @@ export default function VaultDetail() {
                       {/* Price trend */}
                       <div className="bg-white/5 p-3 rounded-xl border border-white/10">
                         <div className="flex justify-between text-xs">
-                          <div className="text-white/60">Giá hiện tại</div>
+                          <div className="text-white/60">Current Price</div>
                           <div className="font-medium text-white">$0.043</div>
                         </div>
                         <div className="flex justify-between text-xs mt-1">
-                          <div className="text-white/60">Thay đổi giá</div>
-                          <div className="text-green-500">+12.3% tháng trước</div>
+                          <div className="text-white/60">Price Change</div>
+                          <div className="text-green-500">+12.3% last month</div>
                         </div>
                       </div>
                     </div>
@@ -691,9 +691,9 @@ export default function VaultDetail() {
                     } />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">Lịch sử hiệu suất</h3>
+                    <h3 className="text-xl font-bold text-white">Performance History</h3>
                     <p className="text-sm text-white/60">
-                      Cách AI đang làm tăng trưởng tiền của bạn
+                      How AI is growing your money
                     </p>
                   </div>
                 </div>
@@ -720,9 +720,9 @@ export default function VaultDetail() {
                     } />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">Theo dõi sức khỏe AI</h3>
+                    <h3 className="text-xl font-bold text-white">AI Health Monitor</h3>
                     <p className="text-sm text-white/60">
-                      AI đang hoạt động thế nào cho bạn
+                      How AI is working for you
                     </p>
                   </div>
                 </div>
@@ -745,7 +745,7 @@ export default function VaultDetail() {
                         {aiConfidenceScore}%
                       </div>
                       <div className="text-xs text-white/60">
-                        AI rất tự tin vào chiến lược hiện tại
+                        AI is very confident in the current strategy
                       </div>
                     </div>
                     <div className="mt-2 h-1.5 bg-white/10 rounded-full overflow-hidden">
@@ -770,14 +770,14 @@ export default function VaultDetail() {
                         vault.type === 'orion' ? 'text-orion' :
                         'text-emerald'
                       } />
-                      <div className="text-sm font-medium text-white">Sức mạnh xử lý</div>
+                      <div className="text-sm font-medium text-white">Processing Power</div>
                     </div>
                     <div className="flex items-center gap-3">
                       <div className="text-3xl font-bold" style={{ color: colors.primary }}>
                         {neuroProcessingScore}%
                       </div>
                       <div className="text-xs text-white/60">
-                        Công suất xử lý đang được sử dụng
+                        Processing capacity being used
                       </div>
                     </div>
                     <div className="mt-2 h-1.5 bg-white/10 rounded-full overflow-hidden">
@@ -799,14 +799,14 @@ export default function VaultDetail() {
                       vault.type === 'orion' ? 'text-orion' :
                       'text-emerald'
                     } />
-                    <div className="text-sm font-medium text-white">Hoạt động AI gần đây</div>
+                    <div className="text-sm font-medium text-white">Recent AI Activity</div>
                   </div>
                   <div className="space-y-2">
                     {optimizationEvents.slice(0, 3).map((event, index) => (
                       <div key={index} className="flex items-center gap-3 bg-white/5 p-3 rounded-lg border border-white/10">
                         <div className={`h-2 w-2 rounded-full`} style={{ backgroundColor: colors.primary }}></div>
                         <div className="text-sm text-white/80">{event}</div>
-                        <div className="text-xs text-white/50 ml-auto">{index === 0 ? 'Vừa xong' : index === 1 ? '5p trước' : '15p trước'}</div>
+                        <div className="text-xs text-white/50 ml-auto">{index === 0 ? 'Just now' : index === 1 ? '5m ago' : '15m ago'}</div>
                       </div>
                     ))}
                   </div>
@@ -828,9 +828,9 @@ export default function VaultDetail() {
                     } />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">Cách AI kiếm tiền</h3>
+                    <h3 className="text-xl font-bold text-white">How AI Makes Money</h3>
                     <p className="text-sm text-white/60">
-                      Giải thích đơn giản về chiến lược AI
+                      Simple explanation of AI strategy
                     </p>
                   </div>
                 </div>
@@ -841,10 +841,10 @@ export default function VaultDetail() {
                       <div className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center">
                         <span className="text-xl font-bold" style={{ color: colors.primary }}>1</span>
                       </div>
-                      <div className="text-base font-medium text-white">Tìm cơ hội</div>
+                      <div className="text-base font-medium text-white">Find Opportunities</div>
                     </div>
                     <p className="text-sm text-white/70">
-                      AI liên tục quét thị trường để tìm nơi tốt nhất kiếm tiền từ khoản gửi của bạn
+                      AI continuously scans the market to find the best places to make money from your deposit
                     </p>
                   </div>
 
@@ -853,10 +853,10 @@ export default function VaultDetail() {
                       <div className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center">
                         <span className="text-xl font-bold" style={{ color: colors.primary }}>2</span>
                       </div>
-                      <div className="text-base font-medium text-white">Quyết định thông minh</div>
+                      <div className="text-base font-medium text-white">Smart Decisions</div>
                     </div>
                     <p className="text-sm text-white/70">
-                      AI quyết định đặt tiền của bạn ở đâu để có lợi nhuận cao nhất với rủi ro phù hợp
+                      AI decides where to place your money for maximum profit with appropriate risk
                     </p>
                   </div>
 
@@ -865,10 +865,10 @@ export default function VaultDetail() {
                       <div className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center">
                         <span className="text-xl font-bold" style={{ color: colors.primary }}>3</span>
                       </div>
-                      <div className="text-base font-medium text-white">Bảo vệ & tăng trưởng</div>
+                      <div className="text-base font-medium text-white">Protect & Grow</div>
                     </div>
                     <p className="text-sm text-white/70">
-                      Tiền của bạn được bảo vệ trong khi tăng trưởng, AI điều chỉnh chiến lược khi cần thiết
+                      Your money is protected while growing, AI adjusts strategy when necessary
                     </p>
                   </div>
                 </div>
@@ -881,15 +881,15 @@ export default function VaultDetail() {
                       'text-emerald'
                     } />
                     <div className="text-sm font-medium text-white">
-                      Chiến lược này là {vault.riskLevel === 'low' ? 'An toàn' : vault.riskLevel === 'medium' ? 'Cân bằng' : 'Tăng trưởng'}
+                      This strategy is {vault.riskLevel === 'low' ? 'Safe' : vault.riskLevel === 'medium' ? 'Balanced' : 'Growth'}
                     </div>
                   </div>
                   <p className="text-sm text-white/70">
                     {vault.type === 'nova' ?
-                      'AI này tập trung vào việc tìm kiếm cơ hội tăng trưởng cao trong khi vẫn bảo vệ khoản đầu tư của bạn. Nó di chuyển nhanh chóng để thu lợi nhuận và giảm thiểu tổn thất.' :
+                      'This AI focuses on finding high growth opportunities while still protecting your investment. It moves quickly to capture profits and minimize losses.' :
                       vault.type === 'orion' ?
-                      'AI này cân bằng giữa tăng trưởng và an toàn. Nó tìm kiếm các cơ hội vững chắc với lợi nhuận tốt đồng thời giữ rủi ro ở mức vừa phải.' :
-                      'AI này ưu tiên an toàn trên hết. Nó chọn những khoản đầu tư ổn định nhất vẫn mang lại lợi nhuận hợp lý, hoàn hảo cho các nhà đầu tư thận trọng.'
+                      'This AI balances growth and safety. It looks for solid opportunities with good returns while keeping risk at a moderate level.' :
+                      'This AI prioritizes safety above all. It chooses the most stable investments that still provide reasonable returns, perfect for cautious investors.'
                     }
                   </p>
                 </div>
@@ -910,9 +910,9 @@ export default function VaultDetail() {
                     } />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold text-white">Luồng hoạt động AI</h3>
+                    <h3 className="text-xl font-bold text-white">AI Activity Stream</h3>
                     <p className="text-sm text-white/60">
-                      Xem AI làm việc cho bạn theo thời gian thực
+                      See AI working for you in real time
                     </p>
                   </div>
                 </div>
@@ -936,9 +936,9 @@ export default function VaultDetail() {
                           'text-emerald'} />
                       </div>
                       <div>
-                        <CardTitle className="text-xl font-bold mb-0.5">Tiền của bạn được bảo vệ</CardTitle>
+                        <CardTitle className="text-xl font-bold mb-0.5">Your Money is Protected</CardTitle>
                         <CardDescription className="text-sm text-white/60">
-                          Cách chúng tôi bảo vệ khoản đầu tư của bạn 24/7
+                          How we protect your investment 24/7
                         </CardDescription>
                       </div>
                     </div>
@@ -952,10 +952,10 @@ export default function VaultDetail() {
                             vault.type === 'orion' ? 'text-orion' :
                             'text-emerald'
                           } />
-                          <div className="text-sm font-medium text-white">Mã được kiểm toán</div>
+                          <div className="text-sm font-medium text-white">Audited Code</div>
                         </div>
                         <p className="text-xs text-white/70">
-                          Hợp đồng thông minh của chúng tôi đã được kiểm toán bởi các công ty bảo mật hàng đầu
+                          Our smart contracts have been audited by leading security companies
                         </p>
                       </div>
 
@@ -966,10 +966,10 @@ export default function VaultDetail() {
                             vault.type === 'orion' ? 'text-orion' :
                             'text-emerald'
                           } />
-                          <div className="text-sm font-medium text-white">Kiểm soát rủi ro</div>
+                          <div className="text-sm font-medium text-white">Risk Control</div>
                         </div>
                         <p className="text-xs text-white/70">
-                          AI liên tục theo dõi và điều chỉnh các vị thế để bảo vệ tiền của bạn khỏi biến động thị trường
+                          AI continuously monitors and adjusts positions to protect your money from market fluctuations
                         </p>
                       </div>
 
@@ -980,10 +980,10 @@ export default function VaultDetail() {
                             vault.type === 'orion' ? 'text-orion' :
                             'text-emerald'
                           } />
-                          <div className="text-sm font-medium text-white">Giám sát 24/7</div>
+                          <div className="text-sm font-medium text-white">24/7 Monitoring</div>
                         </div>
                         <p className="text-xs text-white/70">
-                          Không giống con người, AI của chúng tôi không bao giờ ngủ và liên tục theo dõi khoản đầu tư của bạn
+                          Unlike humans, our AI never sleeps and continuously monitors your investment
                         </p>
                       </div>
                     </div>
@@ -993,10 +993,10 @@ export default function VaultDetail() {
                         <Shield size={24} className="text-green-500" />
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-white mb-1">Trạng thái bảo mật hiện tại</div>
+                        <div className="text-sm font-medium text-white mb-1">Current Security Status</div>
                         <div className="flex items-center gap-2 text-sm text-green-500">
                           <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                          Tất cả hệ thống hoạt động tốt
+                          All systems operating well
                         </div>
                       </div>
                     </div>

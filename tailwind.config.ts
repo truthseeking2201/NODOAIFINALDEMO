@@ -212,6 +212,16 @@ export default {
             transform: 'scale(1.05)'
           },
         },
+        'pulse-slow': {
+          '0%, 100%': {
+            boxShadow: '0 0 15px rgba(255, 168, 34, 0.6)',
+            transform: 'scale(1)'
+          },
+          '50%': {
+            boxShadow: '0 0 30px rgba(255, 168, 34, 0.8)',
+            transform: 'scale(1.05)'
+          },
+        },
         'float': {
           '0%, 100%': {
             transform: 'translateY(0)'
@@ -232,6 +242,7 @@ export default {
         "slow-spin": "spin 4s linear infinite",
         "pulse": "pulse 2s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
         "pulse-glow": "pulse-glow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
+        "pulse-slow": "pulse-slow 3s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
         "float": "float 4s cubic-bezier(0.25, 0.1, 0.25, 1) infinite",
       },
       spacing: {

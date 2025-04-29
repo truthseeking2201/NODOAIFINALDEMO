@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import ReactConfetti from "react-confetti";
-import { CheckCircle, Info } from "lucide-react";
+import { CheckCircle, Info, ExternalLink } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface DepositDrawerSuccessProps {
   vault: { name: string };
@@ -75,7 +74,7 @@ export function DepositDrawerSuccess({
   };
 
   return (
-    <div className="space-y-7 text-center animate-instant-success">
+    <div className="space-y-5 text-center animate-instant-success">
       {isConfettiRunning && (
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
           <ReactConfetti
@@ -111,7 +110,7 @@ export function DepositDrawerSuccess({
         </p>
       </div>
 
-      <div className="bg-white/[0.02] rounded-[20px] p-5 border border-white/[0.06] text-left">
+      <div className="bg-white/[0.02] rounded-[20px] p-4 border border-white/[0.06] text-left">
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className="text-xs text-[#9CA3AF]">Amount</span>
@@ -128,33 +127,36 @@ export function DepositDrawerSuccess({
             <span className="font-mono text-sm">{getUnlockDate()}</span>
           </div>
 
-          <div className="flex justify-between">
-            <span className="text-xs text-[#9CA3AF] flex items-center gap-1">
-              NODOAIx Tokens
-              <Info className="h-3 w-3 text-[#9CA3AF]" />
-            </span>
-            <span className="font-mono text-sm">{(parseFloat(amount) * 0.98).toFixed(2)}</span>
+          {/* Compact NODOAIx Token Info */}
+          <div className="flex items-center justify-between p-2 bg-[#FF8800]/10 rounded-lg border border-[#FF8800]/20">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center animate-pulse-slow">
+                <span className="text-[10px] font-bold text-white">AIx</span>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-white">NODOAIx Tokens</div>
+                <div className="text-[10px] text-white/60 flex items-center gap-1">
+                  <Info size={8} className="text-white/50" />
+                  Rewards, governance & premium features
+                </div>
+              </div>
+            </div>
+            <div className="text-lg font-bold text-[#FFA822]">
+              {(parseFloat(amount) * 0.98).toFixed(2)}
+            </div>
           </div>
-        </div>
 
-        <div className="mt-4 mb-1">
-          <Alert className="bg-amber-500/10 border border-amber-500/20 py-2">
-            <CheckCircle className="h-4 w-4 text-amber-500 mt-0.5" />
-            <AlertDescription className="text-xs text-white/80">
-              NODOAIx Token minted to your wallet. AI-optimized yield token that burns on withdrawal — non-transferable.
-            </AlertDescription>
-          </Alert>
-        </div>
-
-        <div className="mt-3 text-center">
-          <a
-            href={`https://explorer.sui.io/transaction/${transactionHash}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-[#9CA3AF] hover:text-[#F59E0B] inline-flex items-center transition-colors"
-          >
-            Tx {transactionHash.substring(0, 6)}...{transactionHash.substring(transactionHash.length - 4)} ↗
-          </a>
+          <div className="mt-3 text-center">
+            <a
+              href={`https://explorer.sui.io/transaction/${transactionHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-[#9CA3AF] hover:text-[#F59E0B] inline-flex items-center transition-colors"
+            >
+              <ExternalLink size={10} className="mr-1" />
+              Tx {transactionHash.substring(0, 6)}...{transactionHash.substring(transactionHash.length - 4)}
+            </a>
+          </div>
         </div>
       </div>
 

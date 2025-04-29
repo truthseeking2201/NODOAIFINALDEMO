@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { VaultData } from "@/types/vault";
@@ -58,7 +57,7 @@ export function DepositDrawerReview({
   };
 
   return (
-    <div className="space-y-7">
+    <div className="space-y-5">
       <div className="bg-white/[0.02] rounded-[20px] p-5 border border-white/[0.06]">
         <h3 className="text-base font-medium text-center mb-4">Confirm Your Deposit</h3>
 
@@ -109,6 +108,21 @@ export function DepositDrawerReview({
             <span className="font-mono font-medium text-sm text-[#E5E7EB]">
               {formatCurrency(totalReturn)}
             </span>
+          </div>
+
+          {/* Compact NODOAIx Token Info */}
+          <div className="mt-1 p-2 bg-[#FF8800]/10 rounded-lg flex items-center justify-between border border-[#FF8800]/20">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 flex items-center justify-center">
+                <span className="text-[9px] font-bold text-white">AIx</span>
+              </div>
+              <span className="text-xs text-white/80">NODOAIx Tokens</span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <span className="font-bold text-[#FFA822]">{Math.floor(parseFloat(amount) * 0.8)}</span>
+              <span className="text-[10px] text-green-500">≈${(parseFloat(amount) * 0.8 * 0.043).toFixed(2)}</span>
+            </div>
           </div>
         </div>
 
