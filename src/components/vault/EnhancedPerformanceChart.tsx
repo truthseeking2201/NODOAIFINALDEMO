@@ -485,14 +485,30 @@ export function EnhancedPerformanceChart({
       </div>
 
       {/* Display options */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2" id="chart-controls">
         <button
           className={`text-xs px-2 py-1 rounded-md flex items-center gap-1.5 transition-colors ${
             showAIActivity
               ? 'bg-white/20 text-white'
               : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
           }`}
-          onClick={() => setShowAIActivity(!showAIActivity)}
+          onClick={() => {
+            setShowAIActivity(!showAIActivity);
+            // Display results on chart
+            const newState = !showAIActivity;
+            console.log(`AI Optimization ${newState ? 'enabled' : 'disabled'}`);
+
+            // Trigger chart update - this happens automatically due to React state change
+
+            // Show feedback notification
+            if (newState) {
+              const event = new CustomEvent('ai-insight', {
+                detail: { message: "AI Optimization data now visible on chart" }
+              });
+              window.dispatchEvent(event);
+            }
+          }}
+          data-control="ai-optimization"
         >
           {showAIActivity ? <Eye size={12} /> : <EyeOff size={12} />}
           AI Optimization
@@ -504,7 +520,21 @@ export function EnhancedPerformanceChart({
               ? 'bg-white/20 text-white'
               : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
           }`}
-          onClick={() => setShowMarketComparison(!showMarketComparison)}
+          onClick={() => {
+            setShowMarketComparison(!showMarketComparison);
+            // Display results on chart
+            const newState = !showMarketComparison;
+            console.log(`Market Comparison ${newState ? 'enabled' : 'disabled'}`);
+
+            // Show feedback notification
+            if (newState) {
+              const event = new CustomEvent('ai-insight', {
+                detail: { message: "Market Comparison data now visible on chart" }
+              });
+              window.dispatchEvent(event);
+            }
+          }}
+          data-control="market-comparison"
         >
           {showMarketComparison ? <Eye size={12} /> : <EyeOff size={12} />}
           Market Comparison
@@ -516,7 +546,21 @@ export function EnhancedPerformanceChart({
               ? 'bg-white/20 text-white'
               : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
           }`}
-          onClick={() => setShowPrediction(!showPrediction)}
+          onClick={() => {
+            setShowPrediction(!showPrediction);
+            // Display results on chart
+            const newState = !showPrediction;
+            console.log(`Prediction ${newState ? 'enabled' : 'disabled'}`);
+
+            // Show feedback notification
+            if (newState) {
+              const event = new CustomEvent('ai-insight', {
+                detail: { message: "AI Prediction data now visible on chart" }
+              });
+              window.dispatchEvent(event);
+            }
+          }}
+          data-control="prediction"
         >
           {showPrediction ? <Eye size={12} /> : <EyeOff size={12} />}
           Prediction
@@ -528,7 +572,21 @@ export function EnhancedPerformanceChart({
               ? 'bg-white/20 text-white'
               : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white/80'
           }`}
-          onClick={() => setShowVolume(!showVolume)}
+          onClick={() => {
+            setShowVolume(!showVolume);
+            // Display results on chart
+            const newState = !showVolume;
+            console.log(`Volume ${newState ? 'enabled' : 'disabled'}`);
+
+            // Show feedback notification
+            if (newState) {
+              const event = new CustomEvent('ai-insight', {
+                detail: { message: "Trading Volume data now visible on chart" }
+              });
+              window.dispatchEvent(event);
+            }
+          }}
+          data-control="volume"
         >
           {showVolume ? <Eye size={12} /> : <EyeOff size={12} />}
           Volume

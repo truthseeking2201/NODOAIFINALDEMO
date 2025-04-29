@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ConnectWalletButton } from "@/components/wallet/ConnectWalletButton";
+import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 import {
   Bell,
   X,
@@ -17,7 +18,8 @@ import {
   ChevronRight,
   ExternalLink,
   Cpu,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Globe
 } from "lucide-react";
 import {
   Sheet,
@@ -293,6 +295,20 @@ export function AppHeader() {
         {/* Right side controls */}
         <div className="flex items-center gap-3">
 
+          {/* Language Switcher */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="hidden sm:block">
+                  <LanguageSwitcher variant="minimal" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p className="text-xs">Switch Language</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
           {/* Notifications */}
           <TooltipProvider>
             <Tooltip>
@@ -397,6 +413,17 @@ export function AppHeader() {
               </nav>
 
               {/* AI Features section removed */}
+
+              {/* Language switcher in mobile menu */}
+              <div className="p-3 border-t border-white/5">
+                <div className="flex items-center gap-2 text-white/70 mb-3 px-3">
+                  <Globe size={16} className="text-nova" />
+                  <span className="text-sm">Language</span>
+                </div>
+                <div className="px-3 mb-3">
+                  <LanguageSwitcher className="w-full" />
+                </div>
+              </div>
 
               {/* Close button */}
               <div className="p-3 border-t border-white/5">

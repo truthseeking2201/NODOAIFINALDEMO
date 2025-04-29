@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { AIConfidenceScore } from "./AIConfidenceScore";
 import { NeuroProcessingVisualizer } from "./NeuroProcessingVisualizer";
+import { TranslatedSection } from "@/components/shared/TranslatedSection";
+import { TranslatedText } from "@/components/shared/TranslatedText";
 
 interface AIControlPanelProps {
   vaultType: 'nova' | 'orion' | 'emerald';
@@ -181,59 +183,65 @@ export function AIControlPanel({ vaultType, vaultName }: AIControlPanelProps) {
     <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708]">
       {/* Header */}
       <div className="p-6 pb-4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className={`p-2 rounded-lg ${
-            vaultType === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
-            vaultType === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
-            'bg-gradient-to-br from-emerald/30 to-emerald/10'
-          }`}>
-            <Brain size={20} className={
-              vaultType === 'nova' ? 'text-nova' :
-              vaultType === 'orion' ? 'text-orion' :
-              'text-emerald'
-            } />
+        <TranslatedSection>
+          <div className="flex items-center gap-3 mb-4">
+            <div className={`p-2 rounded-lg ${
+              vaultType === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
+              vaultType === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
+              'bg-gradient-to-br from-emerald/30 to-emerald/10'
+            }`}>
+              <Brain size={20} className={
+                vaultType === 'nova' ? 'text-nova' :
+                vaultType === 'orion' ? 'text-orion' :
+                'text-emerald'
+              } />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-white">
+                <TranslatedText id="theoDoi">Theo dõi sức khỏe AI</TranslatedText>
+              </h3>
+              <p className="text-sm text-white/60">
+                <TranslatedText id="aIDangHoatDong">AI đang hoạt động chế độ trên tối</TranslatedText>
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-bold text-white">AI Control Center</h3>
-            <p className="text-sm text-white/60">
-              Neural network monitoring and control panel
-            </p>
-          </div>
-        </div>
+        </TranslatedSection>
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-white/5 p-1 rounded-lg">
-          <button
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-              activePanel === 'performance'
-                ? `bg-gradient-to-r ${colors.buttonGradient} text-white`
-                : 'text-white/60 hover:text-white/80 hover:bg-white/10'
-            }`}
-            onClick={() => setActivePanel('performance')}
-          >
-            Performance
-          </button>
-          <button
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-              activePanel === 'security'
-                ? `bg-gradient-to-r ${colors.buttonGradient} text-white`
-                : 'text-white/60 hover:text-white/80 hover:bg-white/10'
-            }`}
-            onClick={() => setActivePanel('security')}
-          >
-            Security
-          </button>
-          <button
-            className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-              activePanel === 'actions'
-                ? `bg-gradient-to-r ${colors.buttonGradient} text-white`
-                : 'text-white/60 hover:text-white/80 hover:bg-white/10'
-            }`}
-            onClick={() => setActivePanel('actions')}
-          >
-            Activity
-          </button>
-        </div>
+        <TranslatedSection>
+          <div className="flex space-x-1 bg-white/5 p-1 rounded-lg">
+            <button
+              className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                activePanel === 'performance'
+                  ? `bg-gradient-to-r ${colors.buttonGradient} text-white`
+                  : 'text-white/60 hover:text-white/80 hover:bg-white/10'
+              }`}
+              onClick={() => setActivePanel('performance')}
+            >
+              <TranslatedText id="doTinCayAI">Độ tin cậy AI</TranslatedText>
+            </button>
+            <button
+              className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                activePanel === 'security'
+                  ? `bg-gradient-to-r ${colors.buttonGradient} text-white`
+                  : 'text-white/60 hover:text-white/80 hover:bg-white/10'
+              }`}
+              onClick={() => setActivePanel('security')}
+            >
+              <TranslatedText id="saoNangAI">Sao nâng AI</TranslatedText>
+            </button>
+            <button
+              className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                activePanel === 'actions'
+                  ? `bg-gradient-to-r ${colors.buttonGradient} text-white`
+                  : 'text-white/60 hover:text-white/80 hover:bg-white/10'
+              }`}
+              onClick={() => setActivePanel('actions')}
+            >
+              <TranslatedText id="hoatDongAiGanDay">Hoạt động AI gần đây</TranslatedText>
+            </button>
+          </div>
+        </TranslatedSection>
       </div>
 
       {/* Panel Content */}

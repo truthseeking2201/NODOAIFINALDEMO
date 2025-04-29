@@ -24,6 +24,8 @@ import { NeuroProcessingVisualizer } from "@/components/vault/NeuroProcessingVis
 import { AIControlPanel } from "@/components/vault/AIControlPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TranslatedSection } from "@/components/shared/TranslatedSection";
+import { TranslatedText } from "@/components/shared/TranslatedText";
 import {
   Brain,
   Shield,

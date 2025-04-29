@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { lazy, Suspense } from 'react';
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 // Lazy load pages for better performance with improved loading reliability
 const VaultCatalog = lazy(() => import("./pages/VaultCatalog").catch(e => {
@@ -52,18 +53,19 @@ const PageFallback = () => null;
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={
-            <MainLayout>
-              <Suspense fallback={<PageFallback />}>
-                <VaultCatalog />
-              </Suspense>
-            </MainLayout>
-          } />
+    <LanguageProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={
+              <MainLayout>
+                <Suspense fallback={<PageFallback />}>
+                  <VaultCatalog />
+                </Suspense>
+              </MainLayout>
+            } />
 
           {/* Routes for backward compatibility with old URLs */}
           <Route path="/vaults/orion-stable" element={<Navigate to="/vaults/cetus-sui" replace />} />
@@ -96,6 +98,7 @@ const App = () => (
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 

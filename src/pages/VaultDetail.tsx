@@ -28,6 +28,8 @@ import { NeuroProcessingVisualizer } from "@/components/vault/NeuroProcessingVis
 import { AIControlPanel } from "@/components/vault/AIControlPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TranslatedSection } from "@/components/shared/TranslatedSection";
+import { TranslatedText } from "@/components/shared/TranslatedText";
 import {
   Brain,
   Shield,
@@ -218,12 +220,27 @@ export default function VaultDetail() {
       }
     };
 
+    // Handle AI insight notifications from chart controls
+    const handleAiInsight = (e: CustomEvent) => {
+      if (e.detail && e.detail.message) {
+        setAiInsight(e.detail.message);
+        setShowAiInsight(true);
+
+        // Hide after a few seconds
+        setTimeout(() => {
+          setShowAiInsight(false);
+        }, 5000);
+      }
+    };
+
     window.addEventListener('deposit-success', handleDepositSuccess as EventListener);
     window.addEventListener('open-deposit-drawer', handleOpenDepositDrawer as EventListener);
+    window.addEventListener('ai-insight', handleAiInsight as EventListener);
 
     return () => {
       window.removeEventListener('deposit-success', handleDepositSuccess as EventListener);
       window.removeEventListener('open-deposit-drawer', handleOpenDepositDrawer as EventListener);
+      window.removeEventListener('ai-insight', handleAiInsight as EventListener);
     };
   }, []);
 
@@ -690,25 +707,29 @@ export default function VaultDetail() {
             <div className="lg:col-span-8 space-y-6">
               {/* Performance Card */}
               <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2 rounded-lg ${
-                    vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
-                    vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
-                    'bg-gradient-to-br from-emerald/30 to-emerald/10'
-                  }`}>
-                    <LineChart size={20} className={
-                      vault.type === 'nova' ? 'text-nova' :
-                      vault.type === 'orion' ? 'text-orion' :
-                      'text-emerald'
-                    } />
+                <TranslatedSection>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`p-2 rounded-lg ${
+                      vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
+                      vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
+                      'bg-gradient-to-br from-emerald/30 to-emerald/10'
+                    }`}>
+                      <LineChart size={20} className={
+                        vault.type === 'nova' ? 'text-nova' :
+                        vault.type === 'orion' ? 'text-orion' :
+                        'text-emerald'
+                      } />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">
+                        <TranslatedText id="lichSuHieuSuat">Lịch sử hiệu suất</TranslatedText>
+                      </h3>
+                      <p className="text-sm text-white/60">
+                        AI-enhanced performance tracking with predictive analysis
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">Performance Analytics</h3>
-                    <p className="text-sm text-white/60">
-                      AI-enhanced performance tracking with predictive analysis
-                    </p>
-                  </div>
-                </div>
+                </TranslatedSection>
                 <VaultPerformanceSection
                   vault={vault}
                   timeRange={timeRange}
@@ -722,49 +743,57 @@ export default function VaultDetail() {
 
               {/* AI Strategy Card */}
               <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2 rounded-lg ${
-                    vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
-                    vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
-                    'bg-gradient-to-br from-emerald/30 to-emerald/10'
-                  }`}>
-                    <Lightbulb size={20} className={
-                      vault.type === 'nova' ? 'text-nova' :
-                      vault.type === 'orion' ? 'text-orion' :
-                      'text-emerald'
-                    } />
+                <TranslatedSection>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`p-2 rounded-lg ${
+                      vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
+                      vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
+                      'bg-gradient-to-br from-emerald/30 to-emerald/10'
+                    }`}>
+                      <Lightbulb size={20} className={
+                        vault.type === 'nova' ? 'text-nova' :
+                        vault.type === 'orion' ? 'text-orion' :
+                        'text-emerald'
+                      } />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">
+                        <TranslatedText id="cachAIKiemTien">Cách AI kiếm tiền</TranslatedText>
+                      </h3>
+                      <p className="text-sm text-white/60">
+                        <TranslatedText id="quaTongHopKetQua">Qua tổng hợp kết quả trong ngày</TranslatedText>
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">AI Strategy</h3>
-                    <p className="text-sm text-white/60">
-                      How the neural network optimizes your returns
-                    </p>
-                  </div>
-                </div>
+                </TranslatedSection>
                 <AIStrategyVisualizer vaultType={vault.type} />
               </div>
 
               {/* AI Transaction Monitoring */}
               <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={`p-2 rounded-lg ${
-                    vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
-                    vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
-                    'bg-gradient-to-br from-emerald/30 to-emerald/10'
-                  }`}>
-                    <BarChart size={20} className={
-                      vault.type === 'nova' ? 'text-nova' :
-                      vault.type === 'orion' ? 'text-orion' :
-                      'text-emerald'
-                    } />
+                <TranslatedSection>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`p-2 rounded-lg ${
+                      vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
+                      vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
+                      'bg-gradient-to-br from-emerald/30 to-emerald/10'
+                    }`}>
+                      <BarChart size={20} className={
+                        vault.type === 'nova' ? 'text-nova' :
+                        vault.type === 'orion' ? 'text-orion' :
+                        'text-emerald'
+                      } />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-white">
+                        <TranslatedText id="luongHoatDongAI">Luồng hoạt động AI</TranslatedText>
+                      </h3>
+                      <p className="text-sm text-white/60">
+                        <TranslatedText>Real-time activity tracking with AI optimization</TranslatedText>
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white">Transaction Monitoring</h3>
-                    <p className="text-sm text-white/60">
-                      Real-time activity tracking with AI optimization
-                    </p>
-                  </div>
-                </div>
+                </TranslatedSection>
                 <AITransactionTicker vaultType={vault.type} />
               </div>
 
@@ -964,12 +993,25 @@ export default function VaultDetail() {
                         </div>
                       </TabsContent>
                       <TabsContent value="security" className="mt-0">
-                        <VaultSecurityInfo
-                          contractAddress="0x1234567890abcdef1234567890abcdef12345678"
-                          isAudited={true}
-                          explorerUrl="https://explorer.sui.io/address/0x1234567890abcdef1234567890abcdef12345678"
-                          defaultOpen={true}
-                        />
+                        <TranslatedSection>
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Shield size={16} className={colors.primary} />
+                              <h3 className="text-base font-medium text-white">
+                                <TranslatedText id="tienCuaBanDuocBaoVe">Tiền của bạn được bảo vệ</TranslatedText>
+                              </h3>
+                            </div>
+                            <p className="text-sm text-white/70">
+                              <TranslatedText id="cungCongNghamVaToanHoc">Cùng công nghệ mã và toán học để bảo vệ 24/7</TranslatedText>
+                            </p>
+                            <VaultSecurityInfo
+                              contractAddress="0x1234567890abcdef1234567890abcdef12345678"
+                              isAudited={true}
+                              explorerUrl="https://explorer.sui.io/address/0x1234567890abcdef1234567890abcdef12345678"
+                              defaultOpen={true}
+                            />
+                          </div>
+                        </TranslatedSection>
                       </TabsContent>
                     </Tabs>
                   </CardContent>
