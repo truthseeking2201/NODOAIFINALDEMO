@@ -13,6 +13,7 @@ import { vaultService } from "@/services/vaultService";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { NovaAIReasoningDrawer } from "../ai/NovaAIReasoningDrawer";
+import { TransactionDetailDrawer } from "../dashboard/TransactionDetailDrawer";
 
 interface Activity {
   id: string;
@@ -81,13 +82,14 @@ const AIActivityItem = memo(({ activity, onReasoningClick }: {
   </motion.div>
 ));
 
-const TransactionItem = memo(({ activity }: { activity: Activity }) => (
+const TransactionItem = memo(({ activity, onClick }: { activity: Activity, onClick: (activity: Activity) => void }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -20 }}
     transition={{ duration: 0.3 }}
-    className="bg-white/[0.03] border border-white/5 rounded-xl p-3 hover:bg-white/[0.05] transition-colors"
+    className="bg-white/[0.03] border border-white/5 rounded-xl p-3 hover:bg-white/[0.05] transition-colors cursor-pointer"
+    onClick={() => onClick(activity)}
   >
     <div className="flex items-start justify-between">
       <div className="flex items-start space-x-3">
@@ -151,6 +153,8 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
   const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [isReasoningDrawerOpen, setIsReasoningDrawerOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<Activity | null>(null);
+  const [isTransactionDrawerOpen, setIsTransactionDrawerOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState<'ai-activity' | 'my-transactions'>('ai-activity');
 
   // Get transaction history from vault service with staleTime for caching
@@ -292,6 +296,14 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
     setIsReasoningDrawerOpen(true);
   };
 
+  // Open transaction detail drawer
+  const openTransactionDrawer = (activity: Activity) => {
+    if (activity.type === 'ai') return;
+
+    setSelectedTransaction(activity);
+    setIsTransactionDrawerOpen(true);
+  };
+
   // Filter activities by type - memoized to avoid recreating arrays on each render
   const aiActivities = useMemo(() =>
     activities.filter(a => a.type === 'ai'),
@@ -313,7 +325,7 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
           <TabsList className="grid grid-cols-2 mb-6 bg-white/5 rounded-lg p-1">
             <TabsTrigger
               value="ai-activity"
-              className="flex items-center gap-2 data-[state=active]:bg-nova/20 data-[state=active]:text-nova"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:text-orange-500 data-[state=active]:text-black"
             >
               <Cpu size={14} />
               <span>AI Activity</span>
@@ -323,7 +335,7 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
             </TabsTrigger>
             <TabsTrigger
               value="my-transactions"
-              className="flex items-center gap-2 data-[state=active]:bg-nova/20 data-[state=active]:text-nova"
+              className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:text-orange-500 data-[state=active]:text-black"
             >
               <ArrowUpRight size={14} />
               <span>My Transactions</span>
@@ -375,7 +387,11 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
               <AnimatePresence initial={false}>
                 {userActivities.length > 0 ? (
                   userActivities.map((activity) => (
-                    <TransactionItem key={activity.id} activity={activity} />
+                    <TransactionItem
+                      key={activity.id}
+                      activity={activity}
+                      onClick={openTransactionDrawer}
+                    />
                   ))
                 ) : (
                   <div className="text-center py-8 text-white/40">
@@ -401,6 +417,23 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
             amount: selectedActivity.amount,
             range: selectedActivity.range,
             expectedAprChange: selectedActivity.expectedAprChange || 0
+          }}
+        />
+      )}
+
+      {/* Transaction Detail Drawer */}
+      {selectedTransaction && (
+        <TransactionDetailDrawer
+          open={isTransactionDrawerOpen}
+          onClose={() => setIsTransactionDrawerOpen(false)}
+          transaction={{
+            id: selectedTransaction.id,
+            type: selectedTransaction.type as 'deposit' | 'withdraw',
+            amount: selectedTransaction.amount || 0,
+            vaultId: selectedTransaction.vault,
+            vaultName: selectedTransaction.vault,
+            timestamp: selectedTransaction.timestamp.toISOString(),
+            status: 'completed'
           }}
         />
       )}

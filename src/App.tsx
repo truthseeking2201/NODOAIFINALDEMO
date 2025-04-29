@@ -23,6 +23,10 @@ const Dashboard = lazy(() =>
       return { default: () => <PageFallback /> };
     })
 );
+const ActivityDemo = lazy(() => import("./pages/ActivityDemo").catch(e => {
+  console.error("Error loading ActivityDemo:", e);
+  return { default: () => <PageFallback /> };
+}));
 const NotFound = lazy(() => import("./pages/NotFound").catch(e => {
   console.error("Error loading NotFound:", e);
   return { default: () => <PageFallback /> };
@@ -86,6 +90,15 @@ const App = () => (
             <MainLayout>
               <Suspense fallback={<PageFallback />}>
                 <Dashboard />
+              </Suspense>
+            </MainLayout>
+          } />
+
+          {/* Activity Demo route */}
+          <Route path="/activity" element={
+            <MainLayout>
+              <Suspense fallback={<PageFallback />}>
+                <ActivityDemo />
               </Suspense>
             </MainLayout>
           } />

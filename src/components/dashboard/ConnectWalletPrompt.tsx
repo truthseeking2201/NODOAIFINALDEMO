@@ -1,10 +1,21 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useWallet } from "@/hooks/useWallet";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowUpRight, Wallet } from "lucide-react";
 
 export function ConnectWalletPrompt() {
-  const { openConnectModal } = useWallet();
+  const { openConnectModal, connect } = useWallet();
+
+  // Auto-connect when this component is shown (for demo purposes)
+  useEffect(() => {
+    // Small delay to allow the component to render first
+    const timer = setTimeout(() => {
+      connect('sui');
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [connect]);
 
   return (
     <div className="flex items-center justify-center min-h-[70vh]">
@@ -21,7 +32,7 @@ export function ConnectWalletPrompt() {
           </p>
 
           <Button
-            onClick={openConnectModal}
+            onClick={() => connect('sui')}
             className="gradient-bg-nova text-[#0E0F11] font-medium"
             size="lg"
           >

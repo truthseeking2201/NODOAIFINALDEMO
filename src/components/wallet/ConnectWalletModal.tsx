@@ -23,6 +23,13 @@ export function ConnectWalletModal({ open, onClose, onConnected }: ConnectWallet
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
 
+  // Auto-connect to Sui wallet when modal opens (for demo purposes)
+  useEffect(() => {
+    if (open) {
+      handleConnect('sui');
+    }
+  }, [open]);
+
   const handleConnect = async (walletType: 'sui' | 'phantom' | 'martian') => {
     try {
       setIsConnecting(true);

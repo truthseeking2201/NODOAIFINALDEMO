@@ -6,6 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { TransactionHistory } from "@/types/vault";
 import { Badge } from "@/components/ui/badge";
 import { NovaAIReasoningDrawer } from "@/components/ai/NovaAIReasoningDrawer";
+import { TransactionDetailDrawer } from "@/components/dashboard/TransactionDetailDrawer";
 
 // AI Activity interfaces
 interface AIAction {
@@ -73,12 +74,37 @@ const mockAIActivities: AIAction[] = [
     aiAction: 'Removed liquidity from underperforming range',
     aiResult: 'Prevented further losses',
     vault: 'SUI-USDC'
+  },
+  {
+    id: 'action5',
+    type: 'rebalance',
+    pool: 'deep-eth',
+    timestamp: new Date(Date.now() - 600 * 60 * 1000).toISOString(),
+    amount: 4200,
+    expectedAprChange: 1.8,
+    aiAction: 'Reoptimized position after market shift',
+    aiResult: '+1.8% APR increase',
+    vault: 'DEEP-ETH'
+  },
+  {
+    id: 'action6',
+    type: 'add_liquidity',
+    pool: 'cetus-eth',
+    timestamp: new Date(Date.now() - 720 * 60 * 1000).toISOString(),
+    amount: 3500,
+    range: [0.96, 1.05],
+    expectedAprChange: 1.1,
+    aiAction: 'Added liquidity during high volatility',
+    aiResult: '+1.1% APR increase',
+    vault: 'CETUS-ETH'
   }
 ];
 
 export function ActivityPanel({ activities, isLoading }: ActivityPanelProps) {
   const [selectedActivity, setSelectedActivity] = useState<AIAction | null>(null);
   const [isReasoningDrawerOpen, setIsReasoningDrawerOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<TransactionHistory | null>(null);
+  const [isTransactionDrawerOpen, setIsTransactionDrawerOpen] = useState(false);
 
   if (isLoading) {
     return <ActivitySkeletonLoader />;
@@ -91,6 +117,11 @@ export function ActivityPanel({ activities, isLoading }: ActivityPanelProps) {
   const openReasoningDrawer = (activity: AIAction) => {
     setSelectedActivity(activity);
     setIsReasoningDrawerOpen(true);
+  };
+
+  const openTransactionDrawer = (transaction: TransactionHistory) => {
+    setSelectedTransaction(transaction);
+    setIsTransactionDrawerOpen(true);
   };
 
   // For demo purposes, always ensure we have data to display
@@ -125,6 +156,42 @@ export function ActivityPanel({ activities, isLoading }: ActivityPanelProps) {
         vaultName: "SUI-USDC",
         timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
         status: "completed"
+      },
+      {
+        id: "user-4",
+        type: "deposit",
+        amount: 8000,
+        vaultId: "deep-eth",
+        vaultName: "DEEP-ETH",
+        timestamp: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
+        status: "completed"
+      },
+      {
+        id: "user-5",
+        type: "deposit",
+        amount: 3700,
+        vaultId: "cetus-eth",
+        vaultName: "CETUS-ETH",
+        timestamp: new Date(Date.now() - 96 * 60 * 60 * 1000).toISOString(),
+        status: "completed"
+      },
+      {
+        id: "user-6",
+        type: "withdraw",
+        amount: 2200,
+        vaultId: "deep-eth",
+        vaultName: "DEEP-ETH",
+        timestamp: new Date(Date.now() - 120 * 60 * 60 * 1000).toISOString(),
+        status: "completed"
+      },
+      {
+        id: "user-7",
+        type: "deposit",
+        amount: 4500,
+        vaultId: "deep-sui",
+        vaultName: "DEEP-SUI",
+        timestamp: new Date(Date.now() - 168 * 60 * 60 * 1000).toISOString(),
+        status: "completed"
       }
     ];
 
@@ -141,11 +208,11 @@ export function ActivityPanel({ activities, isLoading }: ActivityPanelProps) {
         <CardContent>
           <Tabs defaultValue="ai-activity" className="w-full">
             <TabsList className="grid grid-cols-2 mb-4 bg-white/5 p-1 rounded-lg">
-              <TabsTrigger value="ai-activity" className="tab-trigger data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:text-orange-500">
+              <TabsTrigger value="ai-activity" className="tab-trigger data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:text-orange-500 data-[state=active]:text-black">
                 <Brain size={14} className="mr-1" />
                 AI Activity
               </TabsTrigger>
-              <TabsTrigger value="my-transactions" className="tab-trigger data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:text-orange-500">
+              <TabsTrigger value="my-transactions" className="tab-trigger data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:text-orange-500 data-[state=active]:text-black">
                 <ArrowUpRight size={14} className="mr-1" />
                 My Transactions
               </TabsTrigger>
@@ -176,6 +243,7 @@ export function ActivityPanel({ activities, isLoading }: ActivityPanelProps) {
                     <TransactionItem
                       key={transaction.id}
                       transaction={transaction}
+                      onClick={openTransactionDrawer}
                     />
                   ))
                 ) : (
@@ -204,13 +272,20 @@ export function ActivityPanel({ activities, isLoading }: ActivityPanelProps) {
           }}
         />
       )}
+
+      {/* Transaction Detail Drawer */}
+      <TransactionDetailDrawer
+        open={isTransactionDrawerOpen}
+        onClose={() => setIsTransactionDrawerOpen(false)}
+        transaction={selectedTransaction}
+      />
     </>
   );
 }
 
 function ActivityItem({ activity, onExplain }: { activity: AIAction, onExplain: () => void }) {
   return (
-    <div className="activity-item flex items-start p-3 bg-black/40 border border-white/10 rounded-lg hover:bg-black/50 transition-colors">
+    <div className="activity-item flex items-start p-3 bg-black/40 border border-white/10 rounded-lg hover:bg-black/50 transition-colors cursor-pointer" onClick={onExplain}>
       <div className="activity-icon mr-3 p-2 rounded-full bg-nova/10 text-nova">
         <Brain size={16} />
       </div>
@@ -225,7 +300,7 @@ function ActivityItem({ activity, onExplain }: { activity: AIAction, onExplain: 
         </div>
       </div>
       <button
-        onClick={onExplain}
+        onClick={(e) => { e.stopPropagation(); onExplain(); }}
         className="explain-button p-2 rounded-full bg-nova/10 text-nova hover:bg-nova/20 transition-colors ml-2"
         aria-label="Show AI reasoning"
       >
@@ -235,11 +310,14 @@ function ActivityItem({ activity, onExplain }: { activity: AIAction, onExplain: 
   );
 }
 
-function TransactionItem({ transaction }: { transaction: TransactionHistory }) {
+function TransactionItem({ transaction, onClick }: { transaction: TransactionHistory, onClick: (transaction: TransactionHistory) => void }) {
   const isDeposit = transaction.type === 'deposit';
 
   return (
-    <div className="transaction-item flex items-start p-3 bg-black/40 border border-white/10 rounded-lg hover:bg-black/50 transition-colors">
+    <div
+      className="transaction-item flex items-start p-3 bg-black/40 border border-white/10 rounded-lg hover:bg-black/50 transition-colors cursor-pointer"
+      onClick={() => onClick(transaction)}
+    >
       <div className={`transaction-icon mr-3 p-2 rounded-full ${isDeposit ? 'bg-emerald/10 text-emerald' : 'bg-red-500/10 text-red-500'}`}>
         {isDeposit ? (
           <ArrowDownRight size={16} />

@@ -123,6 +123,42 @@ const createMockTransactions = (): TransactionHistory[] => [
     timestamp: new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString(),
     status: "completed"
   },
+  {
+    id: "user-5",
+    type: "deposit",
+    amount: 8000,
+    vaultId: "deep-eth",
+    vaultName: "DEEP-ETH",
+    timestamp: new Date(Date.now() - 96 * 60 * 60 * 1000).toISOString(),
+    status: "completed"
+  },
+  {
+    id: "user-6",
+    type: "deposit",
+    amount: 3700,
+    vaultId: "cetus-eth",
+    vaultName: "CETUS-ETH",
+    timestamp: new Date(Date.now() - 120 * 60 * 60 * 1000).toISOString(),
+    status: "completed"
+  },
+  {
+    id: "user-7",
+    type: "withdraw",
+    amount: 2200,
+    vaultId: "deep-eth",
+    vaultName: "DEEP-ETH",
+    timestamp: new Date(Date.now() - 144 * 60 * 60 * 1000).toISOString(),
+    status: "completed"
+  },
+  {
+    id: "user-8",
+    type: "deposit",
+    amount: 4500,
+    vaultId: "deep-sui",
+    vaultName: "DEEP-SUI",
+    timestamp: new Date(Date.now() - 168 * 60 * 60 * 1000).toISOString(),
+    status: "completed"
+  },
   // Older transactions
   {
     id: "tx1",
@@ -214,23 +250,16 @@ export class VaultService {
   // Get transaction history with caching
   async getTransactionHistory(vaultId?: string): Promise<TransactionHistory[]> {
     // Reset transaction history to default mock data
-    this.sharedTransactionHistory = createMockTransactions();
+    const mockTransactions = createMockTransactions();
+    this.sharedTransactionHistory = mockTransactions;
 
-    // Check cache first
-    if (cache.transactions) {
-      if (!vaultId) {
-        return Promise.resolve(cache.transactions);
-      }
-      return Promise.resolve(cache.transactions.filter(tx => tx.vaultId === vaultId));
-    }
-
-    cache.transactions = this.sharedTransactionHistory;
-
+    // Always return mock transactions, bypassing the cache for now
+    // This guarantees we'll see the transactions
     if (!vaultId) {
-      return Promise.resolve(this.sharedTransactionHistory);
+      return Promise.resolve(mockTransactions);
     }
 
-    const filteredTransactions = this.sharedTransactionHistory.filter(tx => tx.vaultId === vaultId);
+    const filteredTransactions = mockTransactions.filter(tx => tx.vaultId === vaultId);
     return Promise.resolve(filteredTransactions);
   }
 

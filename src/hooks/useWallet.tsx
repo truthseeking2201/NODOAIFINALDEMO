@@ -144,7 +144,12 @@ export const useWallet = () => {
   // Function to open wallet modal specifically for connection
   const openConnectModal = useCallback(() => {
     setIsConnectModalOpen(true);
-  }, []);
+
+    // Demo mode: Auto-connect after a short delay (for testing only)
+    setTimeout(() => {
+      connect('sui');
+    }, 100);
+  }, [connect]);
 
   const closeConnectModal = useCallback(() => {
     setIsConnectModalOpen(false);
