@@ -39,36 +39,52 @@ const useWalletStore = create<WalletState>((set) => ({
   connect: async (walletType) => {
     set({ isConnecting: true })
 
-    // Simulate connection delay for a more realistic feel
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    // Mock wallet addresses for different wallets
-    let mockAddress = "";
-    switch(walletType) {
-      case 'sui':
-        mockAddress = '0x7d783c975da6e3b5ff8259436d4f7da675da6';
-        break;
-      case 'phantom':
-        mockAddress = '0x8e492fd7a3c975da6e3b5ff8259436d4f7d';
-        break;
-      case 'martian':
-        mockAddress = '0x9f723da6e3b5ff8259436d4f7da675dc975d';
-        break;
-      default:
-        mockAddress = '0x7d783c975da6e3b5ff8259436d4f7da675da6';
-    }
-
-    set({
-      address: mockAddress,
-      isConnected: true,
-      isConnecting: false,
-      isModalOpen: false,
-      walletType,
-      balance: {
-        usdc: 1250.45,
-        receiptTokens: 0
+    try {
+      // Check for wallet extensions before trying to connect
+      if (walletType === 'phantom' && typeof window.phantom === 'undefined') {
+        console.warn("Phantom wallet extension not detected");
+        // Continue with mock data for demo purposes
+      } else if (walletType === 'sui' && typeof window.suiWallet === 'undefined') {
+        console.warn("Sui wallet extension not detected");
+        // Continue with mock data for demo purposes
       }
-    })
+
+      // Simulate connection delay for a more realistic feel
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Mock wallet addresses for different wallets
+      let mockAddress = "";
+      switch(walletType) {
+        case 'sui':
+          mockAddress = '0x7d783c975da6e3b5ff8259436d4f7da675da6';
+          break;
+        case 'phantom':
+          mockAddress = '0x8e492fd7a3c975da6e3b5ff8259436d4f7d';
+          break;
+        case 'martian':
+          mockAddress = '0x9f723da6e3b5ff8259436d4f7da675dc975d';
+          break;
+        default:
+          mockAddress = '0x7d783c975da6e3b5ff8259436d4f7da675da6';
+      }
+
+      set({
+        address: mockAddress,
+        isConnected: true,
+        isConnecting: false,
+        isModalOpen: false,
+        walletType,
+        balance: {
+          usdc: 1250.45,
+          receiptTokens: 0
+        }
+      })
+    } catch (error) {
+      console.error(`Failed to connect ${walletType} wallet:`, error);
+      // Reset the connecting state to avoid UI being stuck
+      set({ isConnecting: false });
+      throw error; // Re-throw to allow component-level handling
+    }
   },
   disconnect: () => {
     set({
@@ -144,12 +160,8 @@ export const useWallet = () => {
   // Function to open wallet modal specifically for connection
   const openConnectModal = useCallback(() => {
     setIsConnectModalOpen(true);
-
-    // Demo mode: Auto-connect after a short delay (for testing only)
-    setTimeout(() => {
-      connect('sui');
-    }, 100);
-  }, [connect]);
+    // Remove auto-connect to make it user-initiated only
+  }, []);
 
   const closeConnectModal = useCallback(() => {
     setIsConnectModalOpen(false);

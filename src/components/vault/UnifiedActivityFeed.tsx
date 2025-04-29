@@ -338,7 +338,7 @@ export function UnifiedActivityFeed({ className = "" }: UnifiedActivityFeedProps
               className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/20 data-[state=active]:to-orange-500/20 data-[state=active]:text-orange-500 data-[state=active]:text-black"
             >
               <ArrowUpRight size={14} />
-              <span>My Transactions</span>
+              <span>Live Transactions</span>
               <Badge variant="outline" className="ml-1 h-5 px-1.5 text-[10px]">
                 {userActivities.length}
               </Badge>

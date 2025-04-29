@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -8,136 +7,100 @@ import {
   TrendingUp,
   Brain,
   Lock,
-  Clock,
-  ChevronRight,
+  ArrowRight,
   Users,
-  Timer,
-  AlarmClock,
   CheckCircle
 } from "lucide-react";
 
 export function NODOAIxPromoBanner() {
   const navigate = useNavigate();
-  const [activePoint, setActivePoint] = useState(0);
-  const [countdown, setCountdown] = useState({ days: 3, hours: 14, minutes: 27 });
-  const [secondsCounter, setSecondsCounter] = useState(59);
+  const [countdown, setCountdown] = useState({ days: 3, hours: 14, minutes: 22, seconds: 15 });
 
-  const keyPoints = [
-    {
-      title: "Auto-Compounding Returns",
-      icon: <TrendingUp className="w-4 h-4 text-amber-500" />,
-      description: "Your tokens grow in value without any manual action"
-    },
-    {
-      title: "Exclusive AI Benefits",
-      icon: <Brain className="w-4 h-4 text-amber-500" />,
-      description: "Priority access to advanced neural optimization"
-    },
-    {
-      title: "Limited Initial Supply",
-      icon: <Lock className="w-4 h-4 text-amber-500" />,
-      description: "Early adopters gain maximum token growth potential"
-    }
-  ];
-
-  // Auto-rotate through key points
+  // Countdown timer
   useEffect(() => {
     const timer = setInterval(() => {
-      setActivePoint((prev) => (prev + 1) % keyPoints.length);
-    }, 4000);
+      setCountdown(prev => {
+        if (prev.seconds > 0) {
+          return { ...prev, seconds: prev.seconds - 1 };
+        } else if (prev.minutes > 0) {
+          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        } else if (prev.hours > 0) {
+          return { ...prev, hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        } else if (prev.days > 0) {
+          return { ...prev, days: prev.days - 1, hours: 23, minutes: 59, seconds: 59 };
+        }
+        return prev;
+      });
+    }, 1000);
     return () => clearInterval(timer);
-  }, [keyPoints.length]);
-
-  // Seconds counter for urgency
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setSecondsCounter((prev) => prev > 0 ? prev - 1 : 59);
-
-      if (secondsCounter === 0) {
-        setCountdown(prev => {
-          if (prev.minutes > 0) {
-            return { ...prev, minutes: prev.minutes - 1 };
-          } else if (prev.hours > 0) {
-            return { ...prev, hours: prev.hours - 1, minutes: 59 };
-          } else if (prev.days > 0) {
-            return { ...prev, days: prev.days - 1, hours: 23, minutes: 59 };
-          }
-          return prev;
-        });
-      }
-    }, 1000); // Update every second
-    return () => clearInterval(timer);
-  }, [secondsCounter]);
+  }, []);
 
   const handleDepositNow = () => {
     navigate("/vaults/deep-sui");
   };
 
-  // Calculate the number of new users in the last hour (random number between 12-24)
-  const newUsersLastHour = Math.floor(Math.random() * 13) + 12;
-
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       {/* Left content - token info */}
-      <Card className="col-span-1 lg:col-span-8 bg-black/30 backdrop-blur-sm border-amber-500/20 overflow-hidden">
-        <div className="p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-white" />
+      <Card className="col-span-1 lg:col-span-8 bg-black/20 border border-white/10 overflow-hidden rounded-xl">
+        <div className="p-8">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 flex items-center justify-center shadow-lg">
+              <Sparkles className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-amber-500">
-                NODOAIx Tokens
-              </h3>
-              <p className="text-white/70 text-sm">
-                Intelligent yield optimization receipts
-              </p>
+              <h3 className="text-xl font-bold text-white">NODOAIx Tokens</h3>
             </div>
           </div>
 
-          <p className="text-white/90 mb-5">
-            When you deposit into any NODO vault, you receive <span className="text-amber-400 font-medium">NODOAIx Tokens</span> that automatically grow in value through our neural network optimizations.
+          <p className="text-white/90 mb-6 text-base">
+            Receive tokens that grow in value through our neural network optimizations when you deposit into any NODO vault.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {keyPoints.map((point, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0.8 }}
-                animate={{
-                  opacity: 1,
-                  scale: activePoint === index ? 1.05 : 1,
-                  borderColor: activePoint === index ? 'rgba(245, 158, 11, 0.5)' : 'rgba(255, 255, 255, 0.1)'
-                }}
-                transition={{ duration: 0.3 }}
-                className={`rounded-lg border p-3 transition-all duration-200 ${
-                  activePoint === index
-                    ? "border-amber-500/50 bg-amber-500/10"
-                    : "border-white/10 bg-black/20"
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-1.5">
-                  {point.icon}
-                  <h4 className="text-sm font-medium text-white">{point.title}</h4>
+            <div className="rounded-xl border border-white/5 bg-black/30 p-4 hover:border-amber-500/20 hover:bg-black/40 transition-all duration-200">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 rounded-lg bg-black/30 border border-white/5">
+                  <TrendingUp className="w-4 h-4 text-amber-500" />
                 </div>
-                <p className="text-xs text-white/70">{point.description}</p>
-              </motion.div>
-            ))}
+                <h4 className="text-sm font-medium text-white">Auto-Compounding</h4>
+              </div>
+              <p className="text-xs text-white/70">Value grows without manual action</p>
+            </div>
+
+            <div className="rounded-xl border border-white/5 bg-black/30 p-4 hover:border-amber-500/20 hover:bg-black/40 transition-all duration-200">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 rounded-lg bg-black/30 border border-white/5">
+                  <Brain className="w-4 h-4 text-amber-500" />
+                </div>
+                <h4 className="text-sm font-medium text-white">AI Benefits</h4>
+              </div>
+              <p className="text-xs text-white/70">Priority access to neural optimization</p>
+            </div>
+
+            <div className="rounded-xl border border-white/5 bg-black/30 p-4 hover:border-amber-500/20 hover:bg-black/40 transition-all duration-200">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="p-2 rounded-lg bg-black/30 border border-white/5">
+                  <Lock className="w-4 h-4 text-amber-500" />
+                </div>
+                <h4 className="text-sm font-medium text-white">Limited Supply</h4>
+              </div>
+              <p className="text-xs text-white/70">Early adopters gain maximum potential</p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Social proof */}
-            <div className="flex items-center p-3 bg-white/5 rounded-lg border border-white/10">
+            <div className="flex items-center p-3 bg-black/30 rounded-lg border border-white/5">
               <Users className="w-4 h-4 text-amber-500 mr-2" />
               <span className="text-sm text-white/80">
-                <span className="text-amber-400 font-medium">{newUsersLastHour} new users</span> joined in the last hour
+                <span className="text-amber-400 font-medium">14 new users</span> joined in the last hour
               </span>
             </div>
 
-            <div className="flex items-center p-3 bg-white/5 rounded-lg border border-white/10">
-              <CheckCircle className="w-4 h-4 text-emerald mr-2" />
+            <div className="flex items-center p-3 bg-black/30 rounded-lg border border-white/5">
+              <CheckCircle className="w-4 h-4 text-emerald-500 mr-2" />
               <span className="text-sm text-white/80">
-                <span className="text-emerald font-medium">4,328 users</span> earning returns
+                <span className="text-emerald-500 font-medium">4,328 users</span> earning returns
               </span>
             </div>
           </div>
@@ -145,62 +108,57 @@ export function NODOAIxPromoBanner() {
       </Card>
 
       {/* Right content - call to action */}
-      <Card className="col-span-1 lg:col-span-4 bg-gradient-to-b from-black/60 to-amber-900/10 border-amber-500/30 overflow-hidden">
-        <div className="p-6">
-          <div className="text-center mb-1">
-            <span className="text-amber-400 text-sm font-medium">Initial Launch Bonus</span>
+      <Card className="col-span-1 lg:col-span-4 bg-black/20 border border-white/10 overflow-hidden rounded-xl">
+        <div className="p-8">
+          <div className="text-center mb-2">
+            <span className="text-amber-400 text-sm font-medium uppercase tracking-wider">Initial Launch Bonus</span>
           </div>
 
-          <div className="text-center mb-2">
-            <div className="text-3xl font-bold text-amber-500">
-              +12% APR
-            </div>
-            <p className="text-xs text-white/60 mt-1">
-              Will decrease to +8% after bonus period
-            </p>
+          <div className="text-center mb-6">
+            <div className="text-4xl font-bold text-amber-500">+12% APR</div>
+            <p className="text-xs text-white/60 mt-1">Will decrease to +8% after bonus period</p>
           </div>
 
           {/* Countdown timer */}
-          <div className="bg-black/40 rounded-lg p-3 mb-4 border border-amber-500/20">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs text-white/70">Bonus Ends In:</span>
-              <AlarmClock className="h-3 w-3 text-amber-500" />
+          <div className="mb-6">
+            <div className="text-center mb-2">
+              <span className="text-sm text-white/80 font-medium">Bonus Ends In:</span>
             </div>
 
-            <div className="flex justify-between">
-              <div className="text-center">
-                <div className="bg-black/60 rounded px-2 py-1 min-w-[40px]">
-                  <span className="text-xl font-bold font-mono text-white">{countdown.days}</span>
+            <div className="flex justify-between gap-3">
+              <div className="text-center flex-1">
+                <div className="bg-black/40 rounded-lg p-3 border border-white/5">
+                  <span className="text-2xl font-bold font-mono text-white">{countdown.days}</span>
                 </div>
-                <span className="text-[10px] text-white/60">DAYS</span>
+                <span className="text-xs text-white/60 uppercase mt-1 block">Days</span>
               </div>
-              <div className="text-center">
-                <div className="bg-black/60 rounded px-2 py-1 min-w-[40px]">
-                  <span className="text-xl font-bold font-mono text-white">{countdown.hours}</span>
+              <div className="text-center flex-1">
+                <div className="bg-black/40 rounded-lg p-3 border border-white/5">
+                  <span className="text-2xl font-bold font-mono text-white">{countdown.hours}</span>
                 </div>
-                <span className="text-[10px] text-white/60">HOURS</span>
+                <span className="text-xs text-white/60 uppercase mt-1 block">Hours</span>
               </div>
-              <div className="text-center">
-                <div className="bg-black/60 rounded px-2 py-1 min-w-[40px]">
-                  <span className="text-xl font-bold font-mono text-white">{countdown.minutes}</span>
+              <div className="text-center flex-1">
+                <div className="bg-black/40 rounded-lg p-3 border border-white/5">
+                  <span className="text-2xl font-bold font-mono text-white">{countdown.minutes}</span>
                 </div>
-                <span className="text-[10px] text-white/60">MINS</span>
+                <span className="text-xs text-white/60 uppercase mt-1 block">Mins</span>
               </div>
-              <div className="text-center">
-                <div className="bg-black/60 rounded px-2 py-1 min-w-[40px]">
-                  <span className="text-xl font-bold font-mono text-white">{secondsCounter}</span>
+              <div className="text-center flex-1">
+                <div className="bg-black/40 rounded-lg p-3 border border-white/5">
+                  <span className="text-2xl font-bold font-mono text-white">{countdown.seconds}</span>
                 </div>
-                <span className="text-[10px] text-white/60">SECS</span>
+                <span className="text-xs text-white/60 uppercase mt-1 block">Secs</span>
               </div>
             </div>
           </div>
 
           <Button
             onClick={handleDepositNow}
-            className="w-full bg-amber-500 hover:bg-amber-600 text-black font-medium py-6 h-12 text-base group"
+            className="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-black font-medium py-6 h-12 text-base group rounded-lg shadow-lg transition-all duration-200"
           >
             Deposit Now
-            <ChevronRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
+            <ArrowRight className="h-4 w-4 ml-1 transition-transform group-hover:translate-x-1" />
           </Button>
 
           <div className="mt-3 text-center">

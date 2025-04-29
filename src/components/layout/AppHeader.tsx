@@ -9,7 +9,6 @@ import {
   X,
   Menu,
   Brain,
-  Search,
   Zap,
   BarChart3,
   ChevronDown,
@@ -49,12 +48,9 @@ interface Notification {
 export function AppHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [isSearchActive, setIsSearchActive] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [aiActivityMode, setAiActivityMode] = useState<"analyzing" | "optimizing" | "monitoring" | "predicting">("monitoring");
   const [showAiDropdown, setShowAiDropdown] = useState(false);
   const location = useLocation();
-  const searchInputRef = React.useRef<HTMLInputElement>(null);
 
   // Preload the Dashboard component on header mount to ensure it's ready for navigation
   useEffect(() => {
@@ -121,31 +117,12 @@ export function AppHeader() {
     setAiActivityMode("monitoring");
   }, []);
 
-  // Focus search input when activated
-  useEffect(() => {
-    if (isSearchActive && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [isSearchActive]);
-
   const markAllAsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
   const markAsRead = (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-  };
-
-  const toggleSearch = () => {
-    setIsSearchActive(!isSearchActive);
-    if (!isSearchActive) {
-      // Focus immediately
-      if (searchInputRef.current) {
-        searchInputRef.current.focus();
-      }
-    } else {
-      setSearchQuery("");
-    }
   };
 
   const getIconForType = (type: Notification['type']) => {
@@ -315,61 +292,6 @@ export function AppHeader() {
 
         {/* Right side controls */}
         <div className="flex items-center gap-3">
-          {/* Search */}
-          <AnimatePresence initial={false}>
-            {isSearchActive ? (
-              <motion.div
-                initial={{ width: 40, opacity: 0 }}
-                animate={{ width: 200, opacity: 1 }}
-                exit={{ width: 40, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="relative hidden md:block"
-              >
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search vaults, assets..."
-                  className="w-full pl-9 pr-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-nova/50 focus:border-nova/50"
-                />
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                  <Search size={14} className="text-white/50" />
-                </div>
-                <button
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white"
-                  onClick={toggleSearch}
-                >
-                  <X size={14} />
-                </button>
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="hidden md:block"
-              >
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={toggleSearch}
-                        className="focus-ring h-9 w-9 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10"
-                      >
-                        <Search size={14} className="text-white/70" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom">
-                      <p className="text-xs">Search vaults & assets</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {/* Notifications */}
           <TooltipProvider>
@@ -423,19 +345,6 @@ export function AppHeader() {
             className="md:hidden container backdrop-blur-2xl border-b border-white/10"
           >
             <div className="bg-black/20 rounded-lg my-2 overflow-hidden">
-              {/* Mobile Search */}
-              <div className="p-3 border-b border-white/5">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search vaults, assets..."
-                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-white/5 border border-white/10 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-nova/50"
-                  />
-                  <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-                    <Search size={14} className="text-white/50" />
-                  </div>
-                </div>
-              </div>
 
               {/* Mobile AI Status removed */}
 

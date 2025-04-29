@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,12 +23,8 @@ export function ConnectWalletModal({ open, onClose, onConnected }: ConnectWallet
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
 
-  // Auto-connect to Sui wallet when modal opens (for demo purposes)
-  useEffect(() => {
-    if (open) {
-      handleConnect('sui');
-    }
-  }, [open]);
+  // Removed auto-connect when modal opens
+  // Now wallet connection requires explicit user action
 
   const handleConnect = async (walletType: 'sui' | 'phantom' | 'martian') => {
     try {
