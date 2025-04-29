@@ -11,8 +11,8 @@ const VaultCatalog = lazy(() => import("./pages/VaultCatalog").catch(e => {
   console.error("Error loading VaultCatalog:", e);
   return { default: () => <PageFallback /> };
 }));
-const VaultDetail = lazy(() => import("./pages/VaultDetail").catch(e => {
-  console.error("Error loading VaultDetail:", e);
+const VaultDetail = lazy(() => import("./pages/EnhancedVaultDetail").catch(e => {
+  console.error("Error loading EnhancedVaultDetail:", e);
   return { default: () => <PageFallback /> };
 }));
 const Dashboard = lazy(() =>

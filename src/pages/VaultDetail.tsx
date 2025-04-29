@@ -23,6 +23,11 @@ import { AITransactionTicker } from "@/components/vault/AITransactionTicker";
 import { AIStrategyVisualizer } from "@/components/vault/AIStrategyVisualizer";
 import { AIQueryAssistant } from "@/components/vault/AIQueryAssistant";
 import { AIActivityNotification } from "@/components/vault/AIActivityNotification";
+import { AIConfidenceScore } from "@/components/vault/AIConfidenceScore";
+import { NeuroProcessingVisualizer } from "@/components/vault/NeuroProcessingVisualizer";
+import { AIControlPanel } from "@/components/vault/AIControlPanel";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Brain,
   Shield,
@@ -37,7 +42,14 @@ import {
   Cpu,
   Lightbulb,
   Network,
-  Lock
+  Lock,
+  ChevronDown,
+  BarChart,
+  ArrowUpRight,
+  ChartPie,
+  CircleOff,
+  Sparkles,
+  Clock
 } from "lucide-react";
 
 export default function VaultDetail() {
@@ -46,11 +58,11 @@ export default function VaultDetail() {
   const [isDepositDrawerOpen, setIsDepositDrawerOpen] = useState(false);
   const [timeRange, setTimeRange] = useState<"daily" | "weekly" | "monthly">("daily");
   const [projectedAmount, setProjectedAmount] = useState<string>("1000");
-  const [unlockProgress, setUnlockProgress] = useState<number>(0);
+  const [unlockProgress, setUnlockProgress] = useState<number>(42);
   const [tokensBalance, setTokensBalance] = useState<number>(1000);
   const [animatedValue, setAnimatedValue] = useState<number>(0);
   const [pulseEffect, setPulseEffect] = useState<boolean>(false);
-  const [unlockTime] = useState<Date>(new Date(Date.now() + 24 * 60 * 60 * 1000)); // 24 hours from now
+  const [unlockTime] = useState<Date>(new Date(Date.now() + 24 * 60 * 60 * 1000 * 12)); // 12 days from now
   const nodoaixCardRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [hasInteracted, setHasInteracted] = useState(false);
@@ -59,6 +71,15 @@ export default function VaultDetail() {
   const [wasManuallyClosedRef, setWasManuallyClosedRef] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [showAiInsight, setShowAiInsight] = useState(false);
+  const [aiConfidenceScore, setAiConfidenceScore] = useState<number>(92);
+  const [neuroProcessingScore, setNeuroProcessingScore] = useState<number>(87);
+  const [optimizationEvents, setOptimizationEvents] = useState<string[]>([
+    "Identified arbitrage opportunity between SUI/USDC pairs",
+    "Rebalanced positions to maximize yield",
+    "Adjusted liquidity allocations based on market trend analysis"
+  ]);
+  const [showAiConfidenceDetails, setShowAiConfidenceDetails] = useState(false);
+  const [showNeuroProcessingDetails, setShowNeuroProcessingDetails] = useState(false);
 
   // Animation effect for NODOAIx Token count
   useEffect(() => {
@@ -114,8 +135,54 @@ export default function VaultDetail() {
       import("@/services/vaultService").then(module => {
         module.vaultService.clearCache();
       }).catch(err => console.error("Failed to clear vault cache:", err));
+
+      // Simulate unlocking progress over time
+      const interval = setInterval(() => {
+        setUnlockProgress(prev => Math.min(prev + 1, 100));
+      }, 30000);
+
+      return () => clearInterval(interval);
     }
   }, [vaultId]);
+
+  // Simulate changing AI confidence and Neuro Processing scores
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const randomChange = Math.random() * 4 - 2;
+      setAiConfidenceScore(prev => Math.min(Math.max(prev + randomChange, 75), 99));
+
+      const neuroChange = Math.random() * 3 - 1;
+      setNeuroProcessingScore(prev => Math.min(Math.max(prev + neuroChange, 70), 98));
+
+      if (Math.random() > 0.7) {
+        const newEvent = generateOptimizationEvent();
+        setOptimizationEvents(prev => [newEvent, ...prev.slice(0, 4)]);
+        setAiInsight(newEvent);
+        setShowAiInsight(true);
+
+        // Hide after a few seconds
+        setTimeout(() => {
+          setShowAiInsight(false);
+        }, 5000);
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const generateOptimizationEvent = () => {
+    const events = [
+      "Detected market inefficiency and adjusted strategy",
+      "Optimized gas usage for higher net returns",
+      "Adjusted position to reduce impermanent loss risk",
+      "Found higher yield opportunity and reallocated funds",
+      "Neural analysis identified emerging market trend",
+      "Automated risk assessment adjusted exposure levels",
+      "Liquidity pool optimization complete",
+      "Predicted volatility increase and hedged positions"
+    ];
+    return events[Math.floor(Math.random() * events.length)];
+  };
 
   // Handle AI insights from the visualizer
   const handleOptimizationEvent = (event: string) => {
@@ -295,12 +362,221 @@ export default function VaultDetail() {
           <VaultDetailHeader vaultName={vault.name} styles={styles} />
         </motion.section>
 
-        {/* Neural Activity Ticker Bar */}
+        {/* AI Status Indicators - NEW COMPONENT */}
         <motion.div
           className="px-4 mb-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.6 }}
+        >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* AI Confidence Score Card */}
+            <div
+              className={`w-full rounded-xl bg-black/40 backdrop-blur-sm border ${
+                vault.type === 'nova' ? 'border-nova/20' :
+                vault.type === 'orion' ? 'border-orion/20' :
+                'border-emerald/20'
+              } p-4 relative overflow-hidden cursor-pointer group`}
+              onClick={() => setShowAiConfidenceDetails(!showAiConfidenceDetails)}
+            >
+              <div className="flex items-center gap-3 mb-2 justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`p-1.5 rounded-lg ${
+                    vault.type === 'nova' ? 'bg-nova/10' :
+                    vault.type === 'orion' ? 'bg-orion/10' :
+                    'bg-emerald/10'
+                  }`}>
+                    <Brain size={16} className={
+                      vault.type === 'nova' ? 'text-nova' :
+                      vault.type === 'orion' ? 'text-orion' :
+                      'text-emerald'
+                    } />
+                  </div>
+                  <div className="text-sm font-medium text-white">
+                    AI Confidence Score
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <span className={`text-xl font-mono font-bold ${
+                    vault.type === 'nova' ? 'text-nova' :
+                    vault.type === 'orion' ? 'text-orion' :
+                    'text-emerald'
+                  }`}>{aiConfidenceScore}</span>
+                  <ChevronDown
+                    size={16}
+                    className="ml-1 text-white/50 transition-transform group-hover:text-white/80"
+                    style={{ transform: showAiConfidenceDetails ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  />
+                </div>
+              </div>
+
+              <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className={`h-full ${
+                    vault.type === 'nova' ? 'bg-gradient-to-r from-orange-600 to-amber-500' :
+                    vault.type === 'orion' ? 'bg-gradient-to-r from-amber-600 to-yellow-500' :
+                    'bg-gradient-to-r from-emerald to-green-500'
+                  }`}
+                  style={{ width: `${aiConfidenceScore}%` }}
+                ></div>
+              </div>
+
+              {/* Explanation details */}
+              <AnimatePresence>
+                {showAiConfidenceDetails && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-3 text-xs text-white/70 space-y-2">
+                      <p>Our AI's confidence in its current strategy based on:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-white/5 p-2 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <span>Market Analysis</span>
+                            <span className="text-xs font-mono">{Math.round(aiConfidenceScore * 0.9)}%</span>
+                          </div>
+                        </div>
+                        <div className="bg-white/5 p-2 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <span>Historical Data</span>
+                            <span className="text-xs font-mono">{Math.round(aiConfidenceScore * 1.05)}%</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Neural Processing Card */}
+            <div
+              className={`w-full rounded-xl bg-black/40 backdrop-blur-sm border ${
+                vault.type === 'nova' ? 'border-nova/20' :
+                vault.type === 'orion' ? 'border-orion/20' :
+                'border-emerald/20'
+              } p-4 relative overflow-hidden cursor-pointer group`}
+              onClick={() => setShowNeuroProcessingDetails(!showNeuroProcessingDetails)}
+            >
+              <div className="flex items-center gap-3 mb-2 justify-between">
+                <div className="flex items-center gap-2">
+                  <div className={`p-1.5 rounded-lg ${
+                    vault.type === 'nova' ? 'bg-nova/10' :
+                    vault.type === 'orion' ? 'bg-orion/10' :
+                    'bg-emerald/10'
+                  }`}>
+                    <Cpu size={16} className={
+                      vault.type === 'nova' ? 'text-nova' :
+                      vault.type === 'orion' ? 'text-orion' :
+                      'text-emerald'
+                    } />
+                  </div>
+                  <div className="text-sm font-medium text-white">
+                    Neuro Processing
+                  </div>
+                </div>
+                <div className="flex items-center">
+                  <span className={`text-xl font-mono font-bold ${
+                    vault.type === 'nova' ? 'text-nova' :
+                    vault.type === 'orion' ? 'text-orion' :
+                    'text-emerald'
+                  }`}>{neuroProcessingScore}</span>
+                  <ChevronDown
+                    size={16}
+                    className="ml-1 text-white/50 transition-transform group-hover:text-white/80"
+                    style={{ transform: showNeuroProcessingDetails ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                  />
+                </div>
+              </div>
+
+              <div className="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+                <div
+                  className={`h-full ${
+                    vault.type === 'nova' ? 'bg-gradient-to-r from-orange-600 to-amber-500' :
+                    vault.type === 'orion' ? 'bg-gradient-to-r from-amber-600 to-yellow-500' :
+                    'bg-gradient-to-r from-emerald to-green-500'
+                  }`}
+                  style={{ width: `${neuroProcessingScore}%` }}
+                ></div>
+              </div>
+
+              {/* Explanation details */}
+              <AnimatePresence>
+                {showNeuroProcessingDetails && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="overflow-hidden"
+                  >
+                    <div className="pt-3 text-xs text-white/70 space-y-2">
+                      <p>Neural network computing power current capacity:</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="bg-white/5 p-2 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <span>Prediction Models</span>
+                            <span className="font-mono">{vault.type === 'nova' ? '24' : vault.type === 'orion' ? '18' : '12'}</span>
+                          </div>
+                        </div>
+                        <div className="bg-white/5 p-2 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <span>Processing Units</span>
+                            <span className="font-mono">{vault.type === 'nova' ? '128' : vault.type === 'orion' ? '96' : '64'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Recent AI Activity */}
+            <div className={`w-full rounded-xl bg-black/40 backdrop-blur-sm border ${
+              vault.type === 'nova' ? 'border-nova/20' :
+              vault.type === 'orion' ? 'border-orion/20' :
+              'border-emerald/20'
+            } p-4 relative overflow-hidden`}>
+              <div className="flex items-center gap-2 mb-3">
+                <div className={`p-1.5 rounded-lg ${
+                  vault.type === 'nova' ? 'bg-nova/10' :
+                  vault.type === 'orion' ? 'bg-orion/10' :
+                  'bg-emerald/10'
+                }`}>
+                  <Zap size={16} className={
+                    vault.type === 'nova' ? 'text-nova' :
+                    vault.type === 'orion' ? 'text-orion' :
+                    'text-emerald'
+                  } />
+                </div>
+                <div className="text-sm font-medium text-white">
+                  Recent AI Actions
+                </div>
+              </div>
+
+              <div className="space-y-2 max-h-[60px] overflow-y-auto custom-scrollbar">
+                {optimizationEvents.slice(0, 3).map((event, index) => (
+                  <div key={index} className="flex items-center text-xs text-white/70 gap-1.5">
+                    <div className="h-1.5 w-1.5 rounded-full bg-green-500"></div>
+                    <span className="truncate">{event}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Neural Activity Ticker Bar */}
+        <motion.div
+          className="px-4 mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
         >
           <div className={`w-full h-12 rounded-xl bg-black/40 backdrop-blur-sm border border-white/10 flex items-center px-4 overflow-hidden`}>
             <div className="flex items-center gap-2">
@@ -414,6 +690,25 @@ export default function VaultDetail() {
             <div className="lg:col-span-8 space-y-6">
               {/* Performance Card */}
               <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`p-2 rounded-lg ${
+                    vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
+                    vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
+                    'bg-gradient-to-br from-emerald/30 to-emerald/10'
+                  }`}>
+                    <LineChart size={20} className={
+                      vault.type === 'nova' ? 'text-nova' :
+                      vault.type === 'orion' ? 'text-orion' :
+                      'text-emerald'
+                    } />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Performance Analytics</h3>
+                    <p className="text-sm text-white/60">
+                      AI-enhanced performance tracking with predictive analysis
+                    </p>
+                  </div>
+                </div>
                 <VaultPerformanceSection
                   vault={vault}
                   timeRange={timeRange}
@@ -422,11 +717,56 @@ export default function VaultDetail() {
                 />
               </div>
 
-              {/* AI Strategy Visualizer */}
-              <AIStrategyVisualizer vaultType={vault.type} />
+              {/* AI Control Panel */}
+              <AIControlPanel vaultType={vault.type} vaultName={vault.name} />
 
-              {/* AI Transaction Ticker */}
-              <AITransactionTicker vaultType={vault.type} />
+              {/* AI Strategy Card */}
+              <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`p-2 rounded-lg ${
+                    vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
+                    vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
+                    'bg-gradient-to-br from-emerald/30 to-emerald/10'
+                  }`}>
+                    <Lightbulb size={20} className={
+                      vault.type === 'nova' ? 'text-nova' :
+                      vault.type === 'orion' ? 'text-orion' :
+                      'text-emerald'
+                    } />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">AI Strategy</h3>
+                    <p className="text-sm text-white/60">
+                      How the neural network optimizes your returns
+                    </p>
+                  </div>
+                </div>
+                <AIStrategyVisualizer vaultType={vault.type} />
+              </div>
+
+              {/* AI Transaction Monitoring */}
+              <div className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative bg-[#060708] p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`p-2 rounded-lg ${
+                    vault.type === 'nova' ? 'bg-gradient-to-br from-nova/30 to-nova/10' :
+                    vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
+                    'bg-gradient-to-br from-emerald/30 to-emerald/10'
+                  }`}>
+                    <BarChart size={20} className={
+                      vault.type === 'nova' ? 'text-nova' :
+                      vault.type === 'orion' ? 'text-orion' :
+                      'text-emerald'
+                    } />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-white">Transaction Monitoring</h3>
+                    <p className="text-sm text-white/60">
+                      Real-time activity tracking with AI optimization
+                    </p>
+                  </div>
+                </div>
+                <AITransactionTicker vaultType={vault.type} />
+              </div>
 
               {/* Strategy & Security Card - Now with AI-focused info */}
               <Card className="overflow-hidden rounded-xl border border-white/20 shadow-lg relative">
@@ -446,15 +786,15 @@ export default function VaultDetail() {
                         vault.type === 'orion' ? 'bg-gradient-to-br from-orion/30 to-orion/10' :
                         'bg-gradient-to-br from-emerald/30 to-emerald/10'
                       }`}>
-                        <Lightbulb size={20} className={
+                        <Shield size={20} className={
                           vault.type === 'nova' ? 'text-nova' :
                           vault.type === 'orion' ? 'text-orion' :
                           'text-emerald'} />
                       </div>
                       <div>
-                        <CardTitle className="text-xl font-bold mb-0.5">How Your Investment Works</CardTitle>
+                        <CardTitle className="text-xl font-bold mb-0.5">Security & Risk Management</CardTitle>
                         <CardDescription className="text-sm text-white/60">
-                          Investment strategy and security features
+                          AI-powered protection and risk mitigation systems
                         </CardDescription>
                       </div>
                     </div>
@@ -470,7 +810,7 @@ export default function VaultDetail() {
                             'bg-emerald/20 data-[state=active]:text-emerald'
                           }`}
                         >
-                          How It Works
+                          Risk Strategy
                         </TabsTrigger>
                         <TabsTrigger
                           value="security"
@@ -480,7 +820,7 @@ export default function VaultDetail() {
                             'bg-emerald/20 data-[state=active]:text-emerald'
                           }`}
                         >
-                          Safety Features
+                          Technical Security
                         </TabsTrigger>
                       </TabsList>
                       <TabsContent value="strategy" className="mt-0 space-y-4">
@@ -491,44 +831,45 @@ export default function VaultDetail() {
                               vault.type === 'orion' ? 'text-orion' :
                               'text-emerald'
                             } />
-                            Investment Strategy
+                            AI Risk Management
                           </h3>
                           <p className="text-text-secondary text-sm leading-relaxed">
-                            {vault.strategy}
+                            Our neural network continuously analyzes market conditions, transaction patterns, and security threats to protect your funds and optimize returns.
                           </p>
 
-                          <div className="grid grid-cols-2 gap-4 mt-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                             <div className="bg-white/5 p-3 rounded-lg border border-white/10">
                               <div className="text-xs text-white/60 mb-1 flex items-center gap-1.5">
-                                <Network size={12} className={
+                                <Shield size={12} className={
                                   vault.type === 'nova' ? 'text-nova' :
                                   vault.type === 'orion' ? 'text-orion' :
                                   'text-emerald'
                                 } />
-                                Processing Power
+                                Protection Systems
                               </div>
                               <div className="text-base font-mono font-medium">
-                                {vault.type === 'nova' ? '24' : vault.type === 'orion' ? '18' : '12'} Layers
+                                {vault.type === 'nova' ? '12' : vault.type === 'orion' ? '10' : '8'} Active Protections
                               </div>
                               <div className="mt-1 text-[10px] text-white/50">
-                                Advanced analysis capabilities
+                                Monitors for vulnerabilities & threats
                               </div>
                             </div>
 
                             <div className="bg-white/5 p-3 rounded-lg border border-white/10">
                               <div className="text-xs text-white/60 mb-1 flex items-center gap-1.5">
-                                <Cpu size={12} className={
+                                <Clock size={12} className={
                                   vault.type === 'nova' ? 'text-nova' :
                                   vault.type === 'orion' ? 'text-orion' :
                                   'text-emerald'
                                 } />
-                                System Speed
+                                Monitoring Status
                               </div>
-                              <div className="text-base font-mono font-medium">
-                                {vault.type === 'nova' ? '128' : vault.type === 'orion' ? '96' : '64'} Units
+                              <div className="text-base font-mono font-medium flex items-center gap-2">
+                                24/7 Active
+                                <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
                               </div>
                               <div className="mt-1 text-[10px] text-white/50">
-                                Faster processing for better results
+                                Continuous real-time analysis
                               </div>
                             </div>
                           </div>
@@ -541,7 +882,7 @@ export default function VaultDetail() {
                               vault.type === 'orion' ? 'text-orion' :
                               'text-emerald'
                             } />
-                            Risk Assessment
+                            Risk Profile
                           </h3>
                           <div className="flex items-center gap-4">
                             <span className={`
@@ -563,6 +904,45 @@ export default function VaultDetail() {
                             </div>
                           </div>
 
+                          <div className="grid grid-cols-3 gap-2 mt-3">
+                            <div className="bg-white/5 p-3 rounded-lg">
+                              <div className="text-xs text-white/60 mb-1">Volatility</div>
+                              <div className="text-base font-medium flex items-center">
+                                <div className="relative w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                                  <div className={`absolute inset-y-0 left-0 ${
+                                    vault.riskLevel === 'low' ? 'bg-emerald w-1/4' :
+                                    vault.riskLevel === 'medium' ? 'bg-orion w-2/4' :
+                                    'bg-nova w-3/4'
+                                  }`}></div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="bg-white/5 p-3 rounded-lg">
+                              <div className="text-xs text-white/60 mb-1">Exposure</div>
+                              <div className="text-base font-medium flex items-center">
+                                <div className="relative w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                                  <div className={`absolute inset-y-0 left-0 ${
+                                    vault.riskLevel === 'low' ? 'bg-emerald w-1/5' :
+                                    vault.riskLevel === 'medium' ? 'bg-orion w-2/5' :
+                                    'bg-nova w-4/5'
+                                  }`}></div>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="bg-white/5 p-3 rounded-lg">
+                              <div className="text-xs text-white/60 mb-1">Liquidity</div>
+                              <div className="text-base font-medium flex items-center">
+                                <div className="relative w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                                  <div className={`absolute inset-y-0 left-0 ${
+                                    vault.riskLevel === 'low' ? 'bg-emerald w-4/5' :
+                                    vault.riskLevel === 'medium' ? 'bg-orion w-3/5' :
+                                    'bg-nova w-2/5'
+                                  }`}></div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
                           <div className="bg-black/20 p-3 rounded-lg border border-white/5 mt-3">
                             <div className="flex items-center gap-2 mb-2">
                               <Shield size={14} className={
@@ -570,14 +950,14 @@ export default function VaultDetail() {
                                 vault.type === 'orion' ? 'text-orion' :
                                 'text-emerald'
                               } />
-                              <span className="text-sm font-medium text-white">Security Approach</span>
+                              <span className="text-sm font-medium text-white">AI Risk Mitigation</span>
                             </div>
                             <p className="text-xs text-white/70">
                               {vault.type === 'nova' ?
-                                'Our system monitors market conditions continuously and responds quickly to protect your investment during market volatility.' :
+                                'Our system monitors market conditions continuously and responds quickly to protect your investment during market volatility. High-risk strategies are balanced with advanced loss prevention algorithms.' :
                                 vault.type === 'orion' ?
-                                'This vault adapts investment strategies based on market conditions, balancing growth potential with appropriate risk management.' :
-                                'This conservative vault prioritizes capital preservation first, automatically adjusting positions to minimize risk during uncertain markets.'
+                                'This vault adapts investment strategies based on market conditions, balancing growth potential with appropriate risk management. The AI automatically adjusts capital allocation to maintain optimal risk/reward ratio.' :
+                                'This conservative vault prioritizes capital preservation first, automatically adjusting positions to minimize risk during uncertain markets. The AI maintains diversified positions to reduce exposure to any single asset.'
                               }
                             </p>
                           </div>
@@ -644,7 +1024,6 @@ export default function VaultDetail() {
                 {/* Card content with backdrop blur */}
                 <div className="relative bg-[#060708] backdrop-blur-md">
                   <Card className="overflow-hidden rounded-xl border-0 relative">
-
                     <CardHeader className="p-6 pb-3">
                       <div className="flex items-center gap-3 mb-2">
                         <div className={`p-2 rounded-lg ${
@@ -659,10 +1038,10 @@ export default function VaultDetail() {
                         </div>
                         <div className="flex-1">
                           <CardTitle className="text-xl font-bold flex items-center justify-between">
-                            <span>Your Vault Tokens</span>
+                            <span>NODOAIx Tokens</span>
                           </CardTitle>
                           <CardDescription className="text-sm text-white/60">
-                            Investment position tracking
+                            Rewards for vault participation
                           </CardDescription>
                         </div>
                         <TooltipProvider>
@@ -673,9 +1052,9 @@ export default function VaultDetail() {
                               </button>
                             </TooltipTrigger>
                             <TooltipContent className="max-w-[300px] p-4 bg-[#0c0c10]/95 border border-white/20 text-white">
-                              <h4 className="font-medium text-sm mb-2 text-amber-500">About Your Vault Tokens</h4>
+                              <h4 className="font-medium text-sm mb-2 text-amber-500">About NODOAIx Tokens</h4>
                               <p className="text-sm text-white/80">
-                                These tokens represent your share of the vault. They're stored securely in your wallet and their value increases as the vault generates returns. You can redeem them anytime to withdraw your funds.
+                                NODOAIx tokens are earned by depositing into vaults. They can be used for boosting yields, governance voting, and accessing exclusive features. Your tokens increase in value as the platform grows.
                               </p>
                             </TooltipContent>
                           </Tooltip>
@@ -684,35 +1063,7 @@ export default function VaultDetail() {
                     </CardHeader>
 
                     <CardContent className="p-6 pt-0 space-y-5">
-                      <div className="grid grid-cols-2 gap-4 mb-1">
-                        <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                          <p className="text-xs text-white/60 mb-1">Deposit</p>
-                          <p className="text-base font-medium font-mono">$1000.00</p>
-                        </div>
-                        <div className="bg-white/5 p-3 rounded-xl border border-white/10">
-                          <p className="text-xs text-white/60 mb-1">Fee</p>
-                          <p className="text-base font-medium font-mono">$12.30</p>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2 bg-white/5 p-3 rounded-xl border border-white/10">
-                        <div className="flex justify-between items-center">
-                          <p className="text-xs text-white/60">Unlock Period: <span className="text-white/80">{Math.ceil((unlockTime.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left</span></p>
-                          <p className="text-xs font-medium font-mono">{unlockProgress}% complete</p>
-                        </div>
-                        <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
-                          <motion.div
-                            className={`h-full ${
-                              vault.type === 'nova' ? 'bg-gradient-to-r from-orange-600 to-amber-500' :
-                              vault.type === 'orion' ? 'bg-gradient-to-r from-amber-600 to-yellow-500' :
-                              'bg-gradient-to-r from-emerald to-green-500'
-                            }`}
-                            style={{ width: `${unlockProgress}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="bg-white/5 p-3 rounded-xl border border-white/10">
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/10">
                         <div className="flex items-center">
                           <div className="receipt-token-icon relative mr-4">
                             <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-600/20 flex items-center justify-center">
@@ -747,22 +1098,71 @@ export default function VaultDetail() {
                               {animatedValue.toFixed(2)}
                             </div>
                             <div className="text-xs text-white/60">
-                              Token balance
+                              Current token balance
                             </div>
                           </div>
                         </div>
                       </div>
 
+                      {/* Token benefits */}
+                      <div className="bg-white/5 p-4 rounded-xl border border-white/10">
+                        <h3 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+                          <Sparkles size={14} className="text-amber-500" />
+                          Token Benefits
+                        </h3>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2 text-xs text-white/80">
+                            <div className="h-1 w-1 rounded-full bg-amber-500"></div>
+                            <span>Yield Boosts up to +2.5% APR</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-white/80">
+                            <div className="h-1 w-1 rounded-full bg-amber-500"></div>
+                            <span>Voting Rights in Protocol Governance</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-white/80">
+                            <div className="h-1 w-1 rounded-full bg-amber-500"></div>
+                            <span>Premium AI Features Access</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 bg-white/5 p-3 rounded-xl border border-white/10">
+                        <div className="flex justify-between items-center">
+                          <p className="text-xs text-white/60">Unlock Period: <span className="text-white/80">{Math.ceil((unlockTime.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left</span></p>
+                          <p className="text-xs font-medium font-mono">{unlockProgress}% complete</p>
+                        </div>
+                        <div className="h-1.5 bg-white/20 rounded-full overflow-hidden">
+                          <motion.div
+                            className={`h-full ${
+                              vault.type === 'nova' ? 'bg-gradient-to-r from-orange-600 to-amber-500' :
+                              vault.type === 'orion' ? 'bg-gradient-to-r from-amber-600 to-yellow-500' :
+                              'bg-gradient-to-r from-emerald to-green-500'
+                            }`}
+                            style={{ width: `${unlockProgress}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Call to action */}
+                      <Button
+                        className={`w-full h-10 text-white transition-all hover:scale-[0.98] shadow-lg text-sm font-semibold ${
+                          'bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-500 hover:to-orange-400'
+                        }`}
+                        onClick={handleActionClick}
+                      >
+                        Deposit to Earn More AIx
+                        <ArrowUpRight className="ml-2 h-4 w-4" />
+                      </Button>
+
                       <div className="bg-white/5 p-3 rounded-xl border border-white/10 space-y-2">
                         <div className="flex justify-between text-xs">
-                          <span className="text-white/60">Total Users</span>
-                          <span className="font-mono">1,203</span>
+                          <span className="text-white/60">Total Token Holders</span>
+                          <span className="font-mono">4,621</span>
                         </div>
                         <div className="flex justify-between text-xs">
-                          <span className="text-white/60">Contract Address</span>
+                          <span className="text-white/60">Token Price</span>
                           <span className="font-mono text-white/80 flex items-center">
-                            0xAB12...3456
-                            <ExternalLink className="ml-1 h-3 w-3 text-white/60" />
+                            $0.043 <span className="text-green-500 ml-1">+2.3%</span>
                           </span>
                         </div>
                       </div>
